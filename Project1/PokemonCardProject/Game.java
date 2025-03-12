@@ -56,13 +56,7 @@ public class Game{
         System.out.println("Player 1 please put a pokemon in the active slot: ");
         System.out.println(player1.getHand());
         //player 1 sets down their active pokemon
-        System.out.println("Player 1 please put the number position of the card you want to place in the active position");
-        int p1ActiveSelect = sc.nextInt();
-        while(!sc.hasNextInt()){
-            System.out.println("Invalid input please try again");
-            sc.next();
-            
-        }
+        int p1ActiveSelect = getValidInput("Player 1 please put the number position of the card you want to place in the active position");
         Card[] p1CurrentHand = player1.getHand();
         boolean p1ActiveSelectionBool = false;
         while(!p1ActiveSelectionBool){
@@ -71,13 +65,12 @@ public class Game{
                 p1ActiveSelectionBool = true;
             }
             else{
-                System.out.println("That is not a valid input try again");
+                System.out.println("That is not a pokemon try again");
             }
         }
         //player 1 will set any more pokemon into the bench if they want to will do later
         while(player1.checkForPokemonInHand(p1CurrentHand)){
-            System.out.println("Do you want to put a pokemon on the bench?(Type 1 for yes, 0 for no): ");
-            int moreBench = sc.nextInt();
+            int moreBench = getValidInput("Do you want to put a pokemon on the bench?(Type 1 for yes, 0 for no): ");
             if(moreBench == 0){
                 break;
             }
@@ -86,7 +79,7 @@ public class Game{
                 player1.benchPokemonHand(p1CurrentHand, p1ActiveSelect, p1ActiveSelect);
             }
             else{
-                System.out.println("Not a valid input");
+                System.out.println("Not a valid number");
             }
         }
         //player 2 sets down their active pokemon this is the cpu player so it is all automated
