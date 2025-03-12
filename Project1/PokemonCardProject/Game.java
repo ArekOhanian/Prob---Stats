@@ -40,6 +40,8 @@ public class Game{
         System.out.println("Drawing starting hand: ");
         player1.populateHand(player1.getDeck(), 7);
         player2.populateHand(player2.getDeck(), 7);
+        //automatic mulligan if the player has no pokemon cards in hand
+        // it also makes the opponent draw a card if the player mulligans
         while(!player1.checkForPokemonInHand(player1.getHand())){
             System.out.println("Player 1 has no pokemon in hand: ");
             player1.mulligan(player1.getHand(), player1.getDeck());
@@ -50,9 +52,12 @@ public class Game{
             player2.mulligan(player2.getHand(), player2.getDeck());
             player1.drawCard(player1.getDeck());
         }
+        //here we populate the prize pools with the cards left in the deck taking the top six cards and putting them into an array
         System.out.println("Populating prize pools");
         player1.populatePrizeCards();
         player2.populatePrizeCards();
+        //here the first player puts a pokemon card in their active slot they should have at least one 
+        //since they were forced to mulligan if they didn't have at least one 
         System.out.println("Player 1 please put a pokemon in the active slot: ");
         System.out.println(player1.getHand());
         //player 1 sets down their active pokemon
@@ -68,7 +73,7 @@ public class Game{
                 System.out.println("That is not a pokemon try again");
             }
         }
-        //player 1 will set any more pokemon into the bench if they want to will do later
+        //player 1 will set any more pokemon into the bench if they want to
         while(player1.checkForPokemonInHand(p1CurrentHand)){
             int moreBench = getValidInput("Do you want to put a pokemon on the bench?(Type 1 for yes, 0 for no): ");
             if(moreBench == 0){
@@ -121,25 +126,27 @@ public class Game{
             int wantsToPlayCard = getValidInput("Player 1 do you want to play a card from your hand? (type 1 for yes 0 for no)");
             if(wantsToPlayCard == 1){
                 stillPlacing = true;
-                System.out.println("What Card do you want to play?");
-                int handPos = sc.nextInt();
+                int handPos = getValidInput("What Card do you want to play? (Please put the number corresponding to the position in your hand)");
                 Card playCard = player1.getHand()[handPos];
                 //this is if they place down an energy card
                 if(playCard.getCardType().equals("Energy")){
                     if(!energyCardPerTurn){
-                        System.out.println("Do you want to attach to the active pokemon: press 0, or the bench: press 1");
-                        int energyChose = sc.nextInt();
+                        int energyChose = getValidInput("Do you want to attach to the active pokemon: press 0, or the bench: press 1");
                         if(energyChose == 0){
                             player1.attachEnergy(player1.getHand(), (EnergyCard) playCard, player1.getActive(), handPos);
                             System.out.println("Energy Attached");
-                      }
+                            energyCardPerTurn = true;
+                        }
                         if(energyChose == 1){
                             player1.displayBench();
-                            System.out.println("Please select the number you want to attatch the energy to");
-                            int benchPos = sc.nextInt();
+                            int benchPos =  getValidInput("Please select the number you want to attatch the energy to");
+                            //implement ways to catch bad inputs
                             player1.attachEnergy(player1.getHand(), (EnergyCard) playCard, player1.getBench()[benchPos], handPos);
+                            energyCardPerTurn = true;
                         }
-                        energyCardPerTurn = true;
+                        else{
+                            System.out.println("That is not a valid number");
+                        }
                     }
                     else{
                         System.out.println("You have already played an energy card this turn");
@@ -252,6 +259,7 @@ public class Game{
         gameOver = true;
     }  
 
+    //This is a method that populates a deck and returns it so that player 1 has this deck set 
     public Card[] player1Deck(){
         Card[] player1Deck = new Card[60];
         ArrayList<EnergyCard> attachedEnergies = new ArrayList<>();
