@@ -195,7 +195,7 @@ public class Game{
                         totalCount++;
                     }
                     if(totalCount >= player1.getActive().getPokemonMoves()[moveSelection].getTotalEnergyCost() && elementCount >= player1.getActive().getPokemonMoves()[moveSelection].getPrimEnergyCostAmmount()){
-                        attack(player1.getActive().getPokemonMoves()[moveSelection], player2.getActive(), player1);
+                        attack(player1.getActive().getPokemonMoves()[moveSelection], player2.getActive(), player1, player2);
                         hasAttacked = true;
                     }
                     else{
@@ -223,7 +223,7 @@ public class Game{
     }
 
     //this is the attack method
-    public void attack(Move attackingMove, PokemonCard toBeAttackedPokemon, Player attackingPlayer){
+    public void attack(Move attackingMove, PokemonCard toBeAttackedPokemon, Player attackingPlayer, Player damagedPlayer){
         if(attackingMove.getPrimEnergyCostType().equals(toBeAttackedPokemon.getWeakness())){
             toBeAttackedPokemon.setHealth(toBeAttackedPokemon.getHealth() - (attackingMove.getDamage() * 2));
             System.out.println("It was supper effective!");
@@ -232,8 +232,13 @@ public class Game{
             toBeAttackedPokemon.setHealth(toBeAttackedPokemon.getHealth() - attackingMove.getDamage());
         }
         System.out.println("You have done " + attackingMove.getDamage() + " Damage. The opponents active has " + toBeAttackedPokemon.getHealth() + " Health left");
-        if(toBeAttackedPokemon.getHealth() < 0){
+        if(toBeAttackedPokemon.getHealth() <= 0){
             if(attackingPlayer.getPrizeCards().length == 1){
+                System.out.println(attackingPlayer.getName() + " Has collected all prize cards");
+                gameOver(attackingPlayer);
+            }
+            if(damagedPlayer.isBenchEmpty()){
+                System.out.println(damagedPlayer.getName() + " has no pokemon in play");
                 gameOver(attackingPlayer);
             }
             attackingPlayer.drawPrizeCard();

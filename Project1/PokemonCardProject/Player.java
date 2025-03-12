@@ -358,8 +358,17 @@ public class Player{
     public void displayActive(){
         System.out.println("Name: " + activeCard.getCardName() + ", Health: " + activeCard.getHealth() + ", Attacks: " + activeCard.getPokemonMoves() + ", Attached Energies: " + activeCard.getAttachedEnergies() + ", Retreat Cost: " + activeCard.getRetreatCost());
     }
-     
     
+    //this method is to check if the bench is empty for win condition reasons where it checks every position in the bench
+    //if there is a pokemon then it returns false but if there are none it returns true
+    public boolean isBenchEmpty(){
+        for(int i = 0; i < bench.length; i++){
+            if (bench[i] != null){
+                return false;
+            }
+        }
+        return true;
+    }
     //method to get the hand size
     public int getHandSize(){
         return hand.length;
