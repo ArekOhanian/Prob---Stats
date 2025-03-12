@@ -184,8 +184,7 @@ public class Game{
         while(!hasAttacked){
             if(attackSelection == 1){
                 System.out.println(player1.getActive().getPokemonMoves());
-                System.out.println("What Move do you want to use? (type the number coresponding to the move 0 for the first 1 for the second)");
-                int moveSelection = sc.nextInt();
+                int moveSelection = getValidInput("What Move do you want to use? (type the number coresponding to the move 0 for the first 1 for the second)");
                 if(moveSelection == 0 || moveSelection == 1){
                     int totalCount = 0;
                     int elementCount = 0;
@@ -210,9 +209,8 @@ public class Game{
         }
         //end step
         while(player1.getHandSize() > 7){
-            System.out.println("Player 1 you have more than 7 cards in hand please select a card to discard: ");
             player1.displayHand();
-            int cardDiscarPos = sc.nextInt();
+            int cardDiscarPos = getValidInput("Player 1 you have more than 7 cards in hand please select a card to discard: ");
             player1.discardCardHand(player1.getHand(), cardDiscarPos);
         }
         
