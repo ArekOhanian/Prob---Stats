@@ -4,7 +4,7 @@ public class SetProTest {
     public static void main(String[] args){
     ArrayList<String> weekday = new ArrayList<String>();
     ArrayList<String> weekend = new ArrayList<String>();
-    SetOperations op = new SetOperations(weekday, weekend);
+    SetOperations op = new SetOperations();
     weekday.add("Monday");
     weekday.add("Tuesday");
     weekday.add("Wednesday");
