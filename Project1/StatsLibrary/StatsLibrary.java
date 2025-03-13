@@ -1,5 +1,6 @@
 package StatsLibrary;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.math.BigDecimal;
 
 public class StatsLibrary{
@@ -134,10 +135,33 @@ public class StatsLibrary{
     }
 
     //This is for geometric distribution
-
+    public double geoDis(double p, int y){
+        double q = 1 - p;
+        double pofY = (Math.pow(q, (y-1))) * p;
+        return pofY;
+    }
 
     //this is for hypergeometric distribution
+    public double hyperGeoDis(int N, int n, int y, int r){
+        BigInteger rCy = combination(r, y);
+        BigInteger NMinRCnMiny = combination(N-r, n-y);
+        BigInteger NCn = combination(N, n);
 
+        BigInteger numerator = rCy.multiply(NMinRCnMiny);
+        BigDecimal hypergeoNum = new BigDecimal(numerator);
+        BigDecimal denom = new BigDecimal(NCn);
+
+        BigDecimal hyperGeo = hypergeoNum.divide(denom, 5, RoundingMode.HALF_UP);
+        return hyperGeo.doubleValue();
+    }
     //this is for negative binomial distribution
-    
+    public double negBiDis(int y, int r, double p){
+        double q = 1 - p;
+        BigInteger yMin1Cnmin1 = combination(y-1, r-1);
+        double pTor = Math.pow(p, r);
+        double qToyMinr = Math.pow(q, (y - r));
+        BigDecimal yMin1CnMin1BigDecimal = new BigDecimal(yMin1Cnmin1);
+        BigDecimal negBiDis = yMin1CnMin1BigDecimal.multiply(BigDecimal.valueOf(pTor * qToyMinr));
+        return negBiDis.doubleValue();
+    }
 }

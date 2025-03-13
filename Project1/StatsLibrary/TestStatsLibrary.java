@@ -11,6 +11,9 @@ public class TestStatsLibrary{
         int mode = tester.findMode(numbers);
         double stanDev = tester.findStandDev(numbers);
         double biDis = tester.biDis(.8, 10, 7);
+        double geoDis = tester.geoDis(.5, 5);
+        double hyperGeo = tester.hyperGeoDis(20, 10, 5, 5);
+        double negBiDis = tester.negBiDis(5, 3, 0.2);
         BigInteger combination = tester.combination(4, 2);
         BigInteger permutation = tester.permutation(4, 2);
         System.out.println("The mean of the numbers is: " + mean);
@@ -20,5 +23,8 @@ public class TestStatsLibrary{
         System.out.println("The combination is: " + combination);
         System.out.println("The permutation is: " + permutation);
         System.out.println(biDis);
+        System.out.println(geoDis);
+        System.out.println(hyperGeo);
+        System.out.println(negBiDis);
     }
 }
