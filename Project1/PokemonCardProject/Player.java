@@ -371,9 +371,24 @@ public class Player{
         return true;
     }
 
+    //this method is for the penny card and it is to retreave a card and put it into your hand
+    public void retrieve(Card card){
+        if (hand.length == 0){
+            hand = new Card[1];
+            hand[0] = card;
+            return;
+        }
+        Card[] tempHand = hand;
+        hand = new Card[tempHand.length + 1];
+        for (int i = 0; i < tempHand.length; i++){
+            hand[i] = tempHand[i];
+        }
+        hand[hand.length - 1] = card;
+    }
     //this is a method to feint a pokemon when they have 0 hp
     public void feintPokemon(){
         discardPile.add(activeCard);
+        discardPile.addAll(activeCard.getAttachedEnergies());
         activeCard = null;
     }
     //method to get the hand size
