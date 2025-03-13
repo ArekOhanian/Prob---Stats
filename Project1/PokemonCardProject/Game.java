@@ -218,33 +218,78 @@ public class Game{
                             else{
                                 System.out.println("That is not a valid number please try again");
                             }
-                            //here is for the trainer card bill which just draws 2 cards
-                            if(playCard.getCardName().equals("Bill") && !supporterPerTurn){
+                        }
+                    }
+                    //here is for the trainer card bill which just draws 2 cards
+                    if(playCard.getCardName().equals("Bill") && !supporterPerTurn){
+                        player1.drawCard(player1.getDeck());
+                        player1.drawCard(player1.getDeck());
+                        supporterPerTurn = true;
+                    }
+                    //this is for the lillie card where you draw up to 6 cards unless it is turn 1 then you draw up to 8
+                    if(playCard.getCardName().equals("Lillie") && !supporterPerTurn){
+                        if (turn == 1){
+                            for(int i = player1.getHand().length; i < 8; i++){
                                 player1.drawCard(player1.getDeck());
-                                player1.drawCard(player1.getDeck());
-                                supporterPerTurn = true;
                             }
-                            //this is for the lillie card where you draw up to 6 cards unless it is turn 1 then you draw up to 8
-                            if(playCard.getCardName().equals("Lillie") && !supporterPerTurn){
-                                if (turn == 1){
-                                    for(int i = player1.getHand().length; i < 8; i++){
-                                        player1.drawCard(player1.getDeck());
-                                    }
-                                    supporterPerTurn = true;
+                            supporterPerTurn = true;
+                            }
+                            else{
+                                for(int i = player1.getHand().length; i < 6; i++){
+                                    player1.drawCard(player1.getDeck());
                                 }
-                                else{
-                                    for(int i = player1.getHand().length; i < 6; i++){
-                                        player1.drawCard(player1.getDeck());
+                            }
+                        }
+                            //this is for the superpotion card
+                    if(playCard.getCardName().equals("Super Potion")){
+                        while(true){
+                            int soupPotPos = getValidInput("Which pokemon do you want to heal (type 0 for active 1 for on on the bench)");
+                            //so here we add 60 to the health of the active pokemon then check if it has any energies attached to it and if they do discard it
+                            //so the energy is added to the discard pile and then removed from the array list of attached energies
+                            //then we check if it has gone over it's max health
+                            //if it is then we set it's health to its original max health
+                            if(soupPotPos == 0){
+                                player1.getActive().setHealth(player1.getActive().getHealth() + 60);
+                                while (true){
+                                    if(!player1.getActive().getAttachedEnergies().isEmpty()){
+                                        int energyDis = getValidInput("Which energy do you want to get rid of please type the number");
+                                        if(energyDis <= player1.getActive().getAttachedEnergies().size()){
+                                            player1.getDiscardPile().add(player1.getActive().getAttachedEnergies().get(energyDis));
+                                            player1.getActive().getAttachedEnergies().remove(energyDis); 
+                                            break;
+                                        }
+                                        else{
+                                            System.out.println("not a valid index try again");
+                                        }
                                     }
                                 }
+                                if(player1.getActive().getHealth() > player1.getActive().getMaxHealth()){
+                                    player1.getActive().setHealth(player1.getActive().getMaxHealth());
+                                }
+                                break;
+                            }   
+                            if(soupPotPos == 1){
+                                int soupPotPosTwo = getValidInput("Which position on the bench do you want to heal?");
+                                    if(soupPotPosTwo >= 0 && soupPotPosTwo <= 5 && player1.getBench()[soupPotPosTwo] != null ){
+                                        player1.getBench()[soupPotPosTwo].setHealth(player1.getBench()[soupPotPosTwo].getHealth() + 60);
+                                        if(player1.getBench()[soupPotPosTwo].getHealth() > player1.getBench()[soupPotPosTwo].getMaxHealth()){
+                                            player1.getBench()[soupPotPosTwo].setHealth(player1.getBench()[soupPotPosTwo].getMaxHealth());
+                                        }
+                                    break;
+                                    }
+                                    else{
+                                        System.out.println("That is not a valid input");
+                                    }
+                            }
+                            else{
+                                System.out.println("That is not a valid number please try again");
                             }
                         }
                     }
                 }
             }
         
-    
-            //so here it check if the player wants to continue playing cards or if they have no cards and ends the main phase if either condition are met
+        //so here it check if the player wants to continue playing cards or if they have no cards and ends the main phase if either condition are met
             if(wantsToPlayCard == 0 || player1.getHandSize() == 0){
                 stillPlacing = false;
             }
@@ -302,22 +347,31 @@ public class Game{
 
     //this is the attack method
     public void attack(Move attackingMove, PokemonCard toBeAttackedPokemon, Player attackingPlayer, Player damagedPlayer){
+        //this is for the deino's move stomp off where it does no damage but discards the top card from the deck
+        if (attackingMove.getName().equals("Stomp Off")){
+            damagedPlayer.discardCardDeck();
+        }
+        //this is to check if the pokemon is weak to the specific move element
         if(attackingMove.getPrimEnergyCostType().equals(toBeAttackedPokemon.getWeakness())){
             toBeAttackedPokemon.setHealth(toBeAttackedPokemon.getHealth() - (attackingMove.getDamage() * 2));
             System.out.println("It was supper effective!");
         }
+        //of not we just subtract the health from the attacking move 
         else{
             toBeAttackedPokemon.setHealth(toBeAttackedPokemon.getHealth() - attackingMove.getDamage());
         }
         System.out.println("You have done " + attackingMove.getDamage() + " Damage. The opponents active has " + toBeAttackedPokemon.getHealth() + " Health left");
+        //here is where we check if the pokemon has feinted if they have then we draw a card from the bench
         if(toBeAttackedPokemon.getHealth() <= 0){
             //here we make sure that the bench is not empty cause if it is then the player who got attacked losses
+            damagedPlayer.feintPokemon();
             if(damagedPlayer.isBenchEmpty()){
                 System.out.println(damagedPlayer.getName() + " has no pokemon in play");
                 gameOver(attackingPlayer);
             }
             System.out.println(attackingPlayer.getName() + " Draws a prize Card");
             attackingPlayer.drawPrizeCard();
+            // here we check if the attacking players prize pool is empty cause if it is then they win
             if(attackingPlayer.getPrizeCards().length == 0){
                 System.out.println(attackingPlayer.getName() + " Has collected all prize cards");
                 gameOver(attackingPlayer);

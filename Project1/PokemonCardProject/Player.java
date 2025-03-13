@@ -370,6 +370,12 @@ public class Player{
         }
         return true;
     }
+
+    //this is a method to feint a pokemon when they have 0 hp
+    public void feintPokemon(){
+        discardPile.add(activeCard);
+        activeCard = null;
+    }
     //method to get the hand size
     public int getHandSize(){
         return hand.length;
