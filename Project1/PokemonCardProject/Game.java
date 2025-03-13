@@ -15,8 +15,8 @@ public class Game{
     public void runGame(){
         setup();
         while(!gameOver){
-        player1Turn();
-        player2Turn();
+            player1Turn();
+            player2Turn();
         }
     }
     
