@@ -10,11 +10,14 @@ public class Game{
     Random rand = new Random();
     Scanner sc = new Scanner(System.in);
     private boolean energyCardPerTurn;
+    private int turn;
 
 
     public void runGame(){
         setup();
         while(!gameOver){
+            turn++;
+            System.out.println("Turn " + turn);
             player1Turn();
             player2Turn();
         }
@@ -176,17 +179,71 @@ public class Game{
                 }
                 //this is if they want to place down a trainer card
                 if(playCard.getCardType().equals("Trainer")){
+                    boolean supporterPerTurn = false;
                     //this card discards your current hand and draws 7 cards
-                    if(playCard.getCardName().equals("Professors Research")){
+                    if(playCard.getCardName().equals("Professors Research") && !supporterPerTurn){
                         for(int i = player1.getHandSize(); i >= 0; i--){
                             player1.discardCardHand(player1.getHand(), 0);
                         }
                         for (int i = 0; i < 7; i++){
                             player1.drawCard(player1.getDeck());
                         }
+                        supporterPerTurn = true;
+                    }
+                    if(playCard.getCardType().equals("Potion")){
+                        while(true){
+                            int potionPos = getValidInput("Which pokemon do you want to heal (type 0 for active 1 for on on the bench)");
+                            //so here we add 30 to the health of the active pokemon and then check if it is more than it's max health
+                            //if it is then we set it's health to its original max health
+                            if(potionPos == 0){
+                                player1.getActive().setHealth(player1.getActive().getHealth() + 30);
+                                if(player1.getActive().getHealth() > player1.getActive().getMaxHealth()){
+                                    player1.getActive().setHealth(player1.getActive().getMaxHealth());
+                                }
+                                break;
+                            }
+                            if(potionPos == 1){
+                                int potPosTwo = getValidInput("Which position on the bench do you want to heal?");
+                                    if(potPosTwo >= 0 && potPosTwo <= 5 && player1.getBench()[potPosTwo] != null ){
+                                        player1.getBench()[potPosTwo].setHealth(player1.getBench()[potPosTwo].getHealth() + 30);
+                                        if(player1.getBench()[potPosTwo].getHealth() > player1.getBench()[potPosTwo].getMaxHealth()){
+                                            player1.getBench()[potPosTwo].setHealth(player1.getBench()[potPosTwo].getMaxHealth());
+                                        }
+                                    break;
+                                    }
+                                    else{
+                                        System.out.println("That is not a valid input");
+                                    }
+                            }
+                            else{
+                                System.out.println("That is not a valid number please try again");
+                            }
+                            //here is for the trainer card bill which just draws 2 cards
+                            if(playCard.getCardName().equals("Bill") && !supporterPerTurn){
+                                player1.drawCard(player1.getDeck());
+                                player1.drawCard(player1.getDeck());
+                                supporterPerTurn = true;
+                            }
+                            //this is for the lillie card where you draw up to 6 cards unless it is turn 1 then you draw up to 8
+                            if(playCard.getCardName().equals("Lillie") && !supporterPerTurn){
+                                if (turn == 1){
+                                    for(int i = player1.getHand().length; i < 8; i++){
+                                        player1.drawCard(player1.getDeck());
+                                    }
+                                    supporterPerTurn = true;
+                                }
+                                else{
+                                    for(int i = player1.getHand().length; i < 6; i++){
+                                        player1.drawCard(player1.getDeck());
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
+        
+    
             //so here it check if the player wants to continue playing cards or if they have no cards and ends the main phase if either condition are met
             if(wantsToPlayCard == 0 || player1.getHandSize() == 0){
                 stillPlacing = false;
@@ -234,9 +291,13 @@ public class Game{
     }
 
     //this is the code for the second Players turn
+    //this turn will be automated
     public void player2Turn(){
         System.out.println("Player 2 turn start:  Drawing a card");
-        player2.drawCard(player2.getDeck());;
+        player2.drawCard(player2.getDeck());
+        if(player2.checkForPokemonInHand(player2.getHand())){
+
+        }
     }
 
     //this is the attack method
@@ -314,6 +375,30 @@ public class Game{
         }
         for (int i = 0; i < 4; i++){
             player1Deck[cardPlacement] = new TrainerCard("Professors Reasearch", "Discard Your hand and draw 7 cards.");
+            cardPlacement++;
+        }
+        for (int i = 0; i < 4; i++){
+            player1Deck[cardPlacement] = new TrainerCard("Potion", "Heal 30 damage from 1 of your pokemon");
+            cardPlacement++;
+        }
+        for (int i = 0; i < 4; i++){
+            player1Deck[cardPlacement] = new TrainerCard("Bill", "Draw 2 cards");
+            cardPlacement++;
+        }
+        for (int i = 0; i < 4; i++){
+            player1Deck[cardPlacement] = new TrainerCard("Lillie", "Draw cards untill you have 6 cards in hand unless it is the first turn then draw until you have 8");
+            cardPlacement++;
+        }
+        for (int i = 0; i < 4; i++){
+            player1Deck[cardPlacement] = new TrainerCard("Super Potion", "Heal 60 damage from one of your pokemon. If you do discard an energy attached from that pokemon if there is one");
+            cardPlacement++;
+        }
+        for (int i = 0; i < 4; i++){
+            player1Deck[cardPlacement] = new TrainerCard("Penny", "Put one of your basic pokemon and all of it's energies into your hand");
+            cardPlacement++;
+        }
+        for (int i = cardPlacement; i < 60; i++){
+            player1Deck[i] = new EnergyCard("Dark");
         }
         return player1Deck;
     }

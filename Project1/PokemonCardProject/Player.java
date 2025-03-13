@@ -128,7 +128,7 @@ public class Player{
             deck[i] = new PokemonCard(); 
         }
         for(int i = pokemonCardCount; i < 60; i++){
-            deck[i] = new EnergyCard();
+            deck[i] = new EnergyCard("Normal");
         }
         return deck;
     }
@@ -187,7 +187,7 @@ public class Player{
             currentDeckSize++;
         }
         for(int i = currentDeckSize; i < 60; i++){
-            deck[i] = new EnergyCard();
+            deck[i] = new EnergyCard("Normal");
             currentDeckSize++;
         }
         return deck;
@@ -216,7 +216,7 @@ public class Player{
             //here we calculate the percent
             double percent = ((double) count/ (double) 10000) * 100;
             System.out.println (count);
-            System.out.println("With " + i + " Rare Candies");
+            System.out.println("With " + (i + 1) + " Rare Candies");
             System.out.println("You have a " + percent + "% chance of bricking");
 
         }

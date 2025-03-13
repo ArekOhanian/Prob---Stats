@@ -3,8 +3,9 @@ package PokemonCardProject;
 public class EnergyCard extends Card{
     private String element;
 
-    public EnergyCard(){
+    public EnergyCard(String element){
         setCardType("Energy");
+        this.element = element;
     }
     //getters & setters
     public String getElement(){

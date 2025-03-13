@@ -7,6 +7,7 @@ public class PokemonCard extends Card{
     private ArrayList<EnergyCard> attachedEnergies;
     private int retreatCost;
     private String weakness;
+    private int maxHealth;
 
     PokemonCard(){
         setCardType("Pokemon");
@@ -15,6 +16,7 @@ public class PokemonCard extends Card{
 
     PokemonCard(int health, String name, Move[] pokemonMoves, int retreatCost , ArrayList<EnergyCard> attachedEnergies, String weakness){
         this.health = health;
+        maxHealth = health;
         setCardName(name);
         this.pokemonMoves = pokemonMoves;
         this.retreatCost = retreatCost;
@@ -54,5 +56,9 @@ public class PokemonCard extends Card{
 
     public String getWeakness(){
         return weakness;
+    }
+
+    public int getMaxHealth(){
+        return maxHealth;
     }
 }
