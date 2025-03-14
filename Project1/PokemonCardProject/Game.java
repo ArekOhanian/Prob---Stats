@@ -146,6 +146,9 @@ public class Game{
 
     //this is the code for the first players turn
     public void playerTurn(Player player, Player opponent, boolean isCpu){
+        if(gameOver){
+            return;
+        }
         energyCardPerTurn = false;
         supporterPerTurn = false;
         drawPhase(player, opponent, isCpu);
