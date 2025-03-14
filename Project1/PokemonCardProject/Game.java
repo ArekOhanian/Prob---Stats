@@ -108,6 +108,7 @@ public class Game{
                 int cardBenchSelection = pickBench(player1);
                 if(player1.getBench()[cardBenchSelection] == null && player1.getHand()[cardHandSelection].getCardType().equals("Pokemon")){
                     player1.benchPokemonHand(player1.getHand(), cardHandSelection, cardBenchSelection);
+                    player1.setHand(player1.cardPlayed(player1.getHand(), cardHandSelection));
                 }
                 else{
                     System.out.println("That bench position is taken or that is not a pokemon card");
@@ -442,14 +443,16 @@ public class Game{
             System.out.println("You have already played a supporter this turn");
         }
         else{
-            for(int i = player.getHandSize(); i >= 0; i--){
+            for(int i = player.getHandSize(); i > 0; i--){
                 player.discardCardHand(player.getHand(), 0);
+                player.setHand(player.cardPlayed(player.getHand(), 0));
             }
             System.out.println("Discarded Hand");
             for(int i = 0; i < 7; i++){
                 player.drawCard(player.getDeck());
             }
             System.out.println("Drew 7 cards");
+            supporterPerTurn = true;
             player.displayHand();
         }
     }
@@ -541,6 +544,7 @@ public class Game{
                 }
                 System.out.println("Drew to 6 cards");
                 player.displayHand();
+                supporterPerTurn = true;
             }
         }
     }
@@ -567,7 +571,7 @@ public class Game{
                     player.setHand(player.cardPlayed(player.getHand(), handPos));
                     while (true){
                     if(!player.getActive().getAttachedEnergies().isEmpty()){
-                        int energyDis = getValidInput("Which energy do you want to get rid of please type the number");
+                        int energyDis = getValidInput("Which energy do you want to get rid of please type the index");
                         if(energyDis <= player.getActive().getAttachedEnergies().size()){
                             player.getDiscardPile().add(player.getActive().getAttachedEnergies().get(energyDis));
                             player.getActive().getAttachedEnergies().remove(energyDis);   
@@ -626,6 +630,7 @@ public class Game{
                 }
                 player.setActive(player.getBench()[0]);
                 System.out.println("Retrieved " + player.getActive().getCardName());
+                supporterPerTurn = true;
             }
             else{
                 int retreaveCard = getValidInput("Do you want to retreave your active or benched pokemon? 0 for active 1 for benched");
@@ -638,6 +643,7 @@ public class Game{
                     player.setHand(player.retrieve(player.getActive().getAttachedEnergies().get(i)));
                 }
                 System.out.println("Retrieved " + player.getActive().getCardName());
+                supporterPerTurn = true;
                 System.out.println("Need a new active pokemon");
                 //calling a benched pokemon to the active slot
                 benchToActive(player);
@@ -655,6 +661,7 @@ public class Game{
                             player.setHand(player.retrieve(player.getBench()[benchPos].getAttachedEnergies().get(i)));
                         }
                         System.out.println("Retrieved " + player.getBench()[benchPos].getCardName());
+                        supporterPerTurn = true;
                         break;
                     }
                     else{
@@ -676,8 +683,7 @@ public class Game{
         //then we make sure you have enough energies to retreat
         if(player.getActive().getAttachedEnergies().size() >= player.getActive().getRetreatCost()){
             System.out.println("Reatreating: " + player.getName() + "'s active pokemon");
-            
-            //this loop is to make sure that the index chosen has a pokemon in it
+
             while(true){
 
                 //we call pick bench to make the player choose which position on the bench to swap with
@@ -689,8 +695,8 @@ public class Game{
 
                     //this loop runs until you discard the active pokemons retreat cost
                     while(discardedEnergies < player.getActive().getRetreatCost()){
-                        System.out.println(player.getActive().getAttachedEnergies());
-                        int disEnPos = getValidInput("Please select one to discard input the index of the energy card");
+                        player.displayEnergies();
+                        int disEnPos = getValidInput(" Please select one to discard input the index of the energy card");
                         if(disEnPos >= 0 && disEnPos < player.getActive().getAttachedEnergies().size()){
                             player.getActive().getAttachedEnergies().remove(disEnPos);
                             discardedEnergies++;
@@ -699,9 +705,11 @@ public class Game{
                             System.out.println("That is not a valid input try again");
                         }
                     }
+                    player.benchActive(retreatSwap);
                     break;
                 }
             }
+
         }
         else{
             System.out.println("You do not have the required ammount of energies to retreat your active pokemon");
@@ -770,8 +778,8 @@ public class Game{
     //this is a method to take a pokemon from the bench and put them into the active slot
     public void benchToActive(Player player){
         while(true){
-            int benchToActive = getValidInput("Please select a pokemon from the bench to set into the active slot (type the index of the card on the bench)");
-            if(benchToActive >= 0 && benchToActive <= 5 && player1.getBench()[benchToActive] != null){
+            int benchToActive = pickBench(player);
+            if(player1.getBench()[benchToActive] != null){
                 player.makeActiveBench(player.getBench(), benchToActive);
                 break;
             }
@@ -784,7 +792,7 @@ public class Game{
     //this is a method for slecting a pokemon on the bench
     public int pickBench(Player player){
         player.displayBench();
-        int benchSelection = getValidInput("Please select Which pokemon on the bench you want to select");
+        int benchSelection = getValidInput(" Please select the pokemon on the bench you want");
         while(true){
             if(benchSelection >= 0 && benchSelection < player.getBench().length){
                 return benchSelection;

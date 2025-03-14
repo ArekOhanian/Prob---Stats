@@ -296,13 +296,17 @@ public class Player{
         activeCard = (PokemonCard) Hand[cardPos];
     }
 
-    //method for making a card the active card from the bench where we swap the benched and active pokemon
+    //method for making a card the active card from the bench where we replace the active card and set the old  position to null
     public void makeActiveBench(Card[] bench, int cardPos){
-        Card temp = activeCard;
         activeCard = (PokemonCard) bench[cardPos];
-        bench[cardPos] = temp; 
+        this.bench[cardPos] = null; 
     }
 
+    public void benchActive(int cardPos){
+        PokemonCard temp = activeCard;
+        activeCard = bench[cardPos];
+        bench[cardPos] = temp;
+    }
     //method for getting a pokemon card from the hand to the bench
     public void benchPokemonHand(Card[] hand, int cardPos, int benchPos){
         if(bench[benchPos] == null){
@@ -351,8 +355,14 @@ public class Player{
         int count = 0;
         System.out.print("[");
         for(int i = 0; i < bench.length; i++){
-            System.out.print(count + " " + bench[i] + ", ");
+            if(bench[i] == null){
+                System.out.print(count + " " + bench[i] + ", ");
+                count++;
+            }
+            else{
+            System.out.print(count + " " + bench[i].getCardName() + ", ");
             count++;
+            }
         }
         System.out.print("]");
     }
@@ -371,7 +381,14 @@ public class Player{
         System.out.println("Name: " + activeCard.getCardName() + ", Health: " + activeCard.getHealth() + ", Attacks: " + activeCard.getPokemonMoves() + ", Attached Energies: " + activeCard.getAttachedEnergies() + ", Retreat Cost: " + activeCard.getRetreatCost());
     }
     
-    
+    //this is for displaying the attached energies
+    public void displayEnergies(){
+        System.out.print("[");
+        for(int i = 0; i < activeCard.getAttachedEnergies().size(); i++){
+            System.out.print(i + " " + activeCard.getAttachedEnergies().get(i).getCardName() + ", ");
+        }
+        System.out.print("]");
+    }
     //this method is to check if the bench is empty for win condition reasons where it checks every position in the bench
     //if there is a pokemon then it returns false but if there are none it returns true
     public boolean isBenchEmpty(){
