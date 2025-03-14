@@ -41,6 +41,6 @@ public class FindBirthday extends Person{
             }
         }
         shareProbability = (double) count/runTimes;
-        return shareProbability;
+        return shareProbability * 100;
     }
 }

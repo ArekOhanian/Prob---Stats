@@ -11,7 +11,7 @@ public class BirthdayTester {
         System.out.print("Input the ammount of times the program is run: ");
         int runTimes = input.nextInt();
 
-        System.out.println("The Probability of two people sharing the same birthday is: " + find.birthdayProbability(classSize, runTimes));
+        System.out.println("The Probability of two people sharing the same birthday is: " + find.birthdayProbability(classSize, runTimes) + "%");
 
 
         input.close();
