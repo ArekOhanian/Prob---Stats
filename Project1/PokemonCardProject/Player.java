@@ -286,6 +286,7 @@ public class Player{
     //method for making a card the active card from the hand
     public void makeActiveHand(Card[] Hand, int cardPos){
         activeCard = (PokemonCard) Hand[cardPos];
+        cardPlayed(Hand, cardPos);
     }
 
     //method for making a card the active card from the bench where we swap the benched and active pokemon

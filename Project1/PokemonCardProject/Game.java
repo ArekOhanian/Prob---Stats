@@ -7,6 +7,8 @@ public class Game{
     private Player player1;
     private Player player2;
     private boolean gameOver;
+    private boolean supporterPerTurn;
+    private boolean energyCardPerTurn;
     Random rand = new Random();
     Scanner sc = new Scanner(System.in);
     private int turn;
@@ -63,6 +65,7 @@ public class Game{
         System.out.println(player1.getHand());
         //player 1 sets down their active pokemon
         int p1ActiveSelect = getValidInput("Player 1 please put the number position of the card you want to place in the active position");
+        if(p1ActiveSelect >= 0 && p1ActiveSelect < player1.getHandSize()){
         boolean p1ActiveSelectionBool = false;
         while(!p1ActiveSelectionBool){
             if(player1.getHand()[p1ActiveSelect].getCardType().equals("Pokemon")){
@@ -73,6 +76,7 @@ public class Game{
                 System.out.println("That is not a pokemon try again");
             }
         }
+    }
         //player 1 will set any more pokemon into the bench if they want to
         while(player1.checkForPokemonInHand(player1.getHand())){
             int moreBench = getValidInput("Do you want to put a pokemon on the bench?(Type 1 for yes, 0 for no): ");
@@ -110,9 +114,12 @@ public class Game{
 
     //this is the code for the first players turn
     public void playerTurn(Player player, Player opponent, boolean isCpu){
+        energyCardPerTurn = false;
+        supporterPerTurn = false;
         drawPhase(player, opponent, isCpu);
         mainPhase(player, isCpu);
         attackPhase(player, opponent, isCpu);
+        endStep(player, isCpu);
         //end step
         while(player.getHandSize() > 7){
             player.displayHand();
@@ -181,13 +188,15 @@ public class Game{
     public void mainPhase(Player player, boolean isCpu){
         boolean energyCardPerTurn = false;
         boolean stillPlacing = true;
-        //so here is a loop where it keeps asking the player if they want to play a card and if they want to they select a card in hand
-        //then depending on the card it does a different thing
-        //the loop will end when the player chooses it to or their hand is empty
+        
+        //this is the automated main phase where we look through the hand and play as many cards as possible from left to right
         if(isCpu){
 
         }
         else{
+        //so here is a loop where it keeps asking the player if they want to play a card and if they want to they select a card in hand
+        //then depending on the card it does a different thing
+        //the loop will end when the player chooses it to or their hand is empty
         while(stillPlacing){
             int mainPhase = getValidInput("Player 1 do you want to play a card from your hand or retreat your active slot? (type 0 to skip main phase type 1 to play a card type 2 to retreat your active card)");
             if(mainPhase == 1){
@@ -199,6 +208,7 @@ public class Game{
                 int handPos = getValidInput("What Card do you want to play? (Please put the number corresponding to the position in your hand)");
                 if(handPos >= 0 && handPos < player.getHandSize()){
                 Card playCard = player.getHand()[handPos];
+
                 //this is if they place down an energy card
                 if(playCard.getCardType().equals("Energy")){
                     if(energyCardPerTurn == false){
@@ -217,142 +227,11 @@ public class Game{
 
                 //this is if they want to place down a trainer card
                 if(playCard.getCardType().equals("Trainer")){
-                    boolean supporterPerTurn = false;
-                    //this card discards your current hand and draws 7 cards
-                    if(playCard.getCardName().equals("Professors Research") && !supporterPerTurn){
-                        for(int i = player.getHandSize(); i >= 0; i--){
-                            player.discardCardHand(player.getHand(), 0);
-                        }
-                        for(int i = 0; i < 7; i++){
-                            player.drawCard(player.getDeck());
-                        }
-                    supporterPerTurn = true;
-                    }
-
-                    if(playCard.getCardType().equals("Potion")){
-                        while(true){
-                            int potionPos = getValidInput("Which pokemon do you want to heal (type 0 for active 1 for on on the bench)");
-                            //so here we add 30 to the health of the active pokemon and then check if it is more than it's max health
-                            //if it is then we set it's health to its original max health
-                            if(potionPos == 0){
-                                player.getActive().setHealth(player.getActive().getHealth() + 30);
-                                if(player.getActive().getHealth() > player.getActive().getMaxHealth()){
-                                    player.getActive().setHealth(player.getActive().getMaxHealth());
-                                }
-                                break;
-                            }
-                            if(potionPos == 1){
-                                int potPosTwo = getValidInput("Which position on the bench do you want to heal?");
-                                if(potPosTwo >= 0 && potPosTwo <= 5 && player1.getBench()[potPosTwo] != null ){
-                                    player.getBench()[potPosTwo].setHealth(player.getBench()[potPosTwo].getHealth() + 30);
-                                    if(player.getBench()[potPosTwo].getHealth() > player.getBench()[potPosTwo].getMaxHealth()){
-                                        player.getBench()[potPosTwo].setHealth(player.getBench()[potPosTwo].getMaxHealth());
-                                    }
-                                break;
-                                }
-                                else{
-                                    System.out.println("That is not a valid input");
-                                }
-                            }
-                            else{
-                                System.out.println("That is not a valid number please try again");
-                            }
-                        }
-                    }
-
-                        //here is for the trainer card bill which just draws 2 cards
-                        if(playCard.getCardName().equals("Bill") && !supporterPerTurn){
-                        player.drawCard(player.getDeck());
-                        player.drawCard(player.getDeck());
-                        supporterPerTurn = true;
-                        }
-
-                        //this is for the lillie card where you draw up to 6 cards unless it is turn 1 then you draw up to 8
-                        if(playCard.getCardName().equals("Lillie") && !supporterPerTurn){
-                            if (turn == 1){
-                                for(int i = player.getHand().length; i < 8; i++){
-                                    player.drawCard(player.getDeck());
-                                }
-                                supporterPerTurn = true;
-                            }
-                                else{
-                                    for(int i = player.getHand().length; i < 6; i++){
-                                        player.drawCard(player.getDeck());
-                                    }
-                                }
-                        }
-
-                        //this is for the superpotion card
-                        if(playCard.getCardName().equals("Super Potion")){
-                            while(true){
-                                int soupPotPos = getValidInput("Which pokemon do you want to heal (type 0 for active 1 for on on the bench)");
-                                //so here we add 60 to the health of the active pokemon then check if it has any energies attached to it and if they do discard it
-                                //so the energy is added to the discard pile and then removed from the array list of attached energies
-                                //then we check if it has gone over it's max health
-                                //if it is then we set it's health to its original max health
-                                if(soupPotPos == 0){
-                                    player.getActive().setHealth(player.getActive().getHealth() + 60);
-                                    while (true){
-                                    if(!player.getActive().getAttachedEnergies().isEmpty()){
-                                        int energyDis = getValidInput("Which energy do you want to get rid of please type the number");
-                                        if(energyDis <= player.getActive().getAttachedEnergies().size()){
-                                            player.getDiscardPile().add(player.getActive().getAttachedEnergies().get(energyDis));
-                                            player.getActive().getAttachedEnergies().remove(energyDis); 
-                                            break;
-                                        }
-                                        else{
-                                            System.out.println("not a valid index try again");
-                                        }
-                                    }
-                                }
-                                if(player.getActive().getHealth() > player.getActive().getMaxHealth()){
-                                    player.getActive().setHealth(player.getActive().getMaxHealth());
-                                }
-                                break;
-                                }   
-                                if(soupPotPos == 1){
-                                    int soupPotPosTwo = getValidInput("Which position on the bench do you want to heal?");
-                                    if(soupPotPosTwo >= 0 && soupPotPosTwo <= 5 && player.getBench()[soupPotPosTwo] != null ){
-                                        player.getBench()[soupPotPosTwo].setHealth(player.getBench()[soupPotPosTwo].getHealth() + 60);
-                                        if(player.getBench()[soupPotPosTwo].getHealth() > player.getBench()[soupPotPosTwo].getMaxHealth()){
-                                            player.getBench()[soupPotPosTwo].setHealth(player.getBench()[soupPotPosTwo].getMaxHealth());
-                                        }
-                                    break;
-                                    }
-                                    else{
-                                        System.out.println("That is not a valid input");
-                                    }
-                                }
-                                else{
-                                    System.out.println("That is not a valid number please try again");
-                                }
-                            }
-                        }
-
-                        //this is when the penny card is played where we make the player select their pokemon to retrive and then give back the eneriges
-                        //attached to them as well as heal them to max health
-                        //we also check to make sure that it wouldn't empty their deck
-                        if(playCard.getCardName().equals("Penny") && !supporterPerTurn){
-                            if(player.isBenchEmpty()){
-                                System.out.println("Your bench is empty and you cannot play this card");
-                            }
-                            else{
-                            int retreaveCard = getValidInput("Do you want to retreave your active or benched pokemon? 0 for active 1 for benched");
-                            if(retreaveCard == 0){
-                                //so here we make the pokemon get their max health since they are going back to their hand
-                                player1.getActive().setHealth(player1.getActive().getMaxHealth());
-                                player1.retrieve(player1.getActive());
-                                for(int i = 0; i < player1.getActive().getAttachedEnergies().size(); i++){
-                                player1.retrieve(player1.getActive().getAttachedEnergies().get(i));
-                                }
-                                //calling bench to active
-                                benchToActive(player1);
-                                }
-                        }
-                    }
+                    trainerPlayed(player, isCpu, playCard, handPos);
                 }
             }    
-        }
+            }
+
             //so here it check if the player wants to continue playing cards or if they have no cards and ends the main phase if either condition are met
             if(mainPhase == 0){
                 stillPlacing = false;
@@ -360,7 +239,7 @@ public class Game{
 
             //this is the code to retreat your active mon
             if(mainPhase == 2){
-
+                retreat(player);
             }
         }
         }
@@ -415,7 +294,31 @@ public class Game{
             }
         }
     }
-    //this is the method for attaching an energy
+    //this is the method for when the turn ends
+    public void endStep(Player player, boolean isCpu){
+        if(isCpu){
+            while(player.getHandSize() > 7){
+                System.out.println("Hand is larger then 7 discarding a card");
+                player.discardCardHand(player.getHand(), 0);
+            }
+        }
+        else{
+            while(player.getHandSize() > 7){
+                player.displayHand();
+                int disPos = getValidInput("Your Hand is larger than 7 please select a card to discard");
+                if(disPos >= 0 && disPos < player.getHandSize() && player.getHand()[disPos] != null){
+                    player.discardCardHand(player.getHand(), disPos);
+                }
+                else{
+                    System.out.println("That is not a valid index try again");
+                }
+            }
+        }
+    }
+
+    //this is the methods for the main phase
+
+    //here is for attaching an energy
     public void attachEnergy(Player player, boolean isCpu, int handPos){
         if(isCpu){
             player.attachEnergy(player.getHand(), (EnergyCard) player.getHand()[handPos], player.getActive(), handPos);
@@ -423,8 +326,28 @@ public class Game{
         }
         else{
             int energyDec = getValidInput("Do you want to attach it to your active or your bench 0 for active 1 for bench");
+            //attaches the energy card from your hand to the active pokemon
             if(energyDec == 0){
                 player.attachEnergy(player.getHand(), (EnergyCard) player.getHand()[handPos], player.getActive(), handPos);
+            }
+            //now it checks if your bench is empty
+            if(energyDec == 1){
+                if(player.isBenchEmpty()){
+                    System.out.println("Your bench is empty");
+                }
+                //if it isn't it askes for what position to attach it to
+                else{
+                    while(true){
+                    int benchPos = pickBench(player);
+                    if(player.getBench()[benchPos] != null){
+                        player.attachEnergy(player.getHand(), (EnergyCard) player.getHand()[handPos], player.getBench()[benchPos], handPos);
+                        break;
+                    }
+                    else{
+                        System.out.println("That index has no pokemon try again");
+                    }
+                }
+                }
             }
         }
     }
@@ -440,6 +363,263 @@ public class Game{
         }
     }
 
+    //this is for when a trainer card is played this is mostly a buffer to see what trainer card it is
+    public void trainerPlayed(Player player, boolean isCpu, Card playCard, int handPos){
+        //this is if you play professors reasearch
+        if(playCard.getCardName().equals("Professors Research")){
+            profReach(player);
+            supporterPerTurn = true;
+        }
+
+        //here is if you play a potion
+        if(playCard.getCardName().equals("Potion")){
+            potion(player, isCpu, handPos);
+        }
+
+        //If the bill card is played
+        if(playCard.getCardName().equals("Bill")){
+            bill(player, handPos);
+        }
+        //here is if you play lillie
+        if(playCard.getCardName().equals("Lillie")){
+            lillie(player, handPos);
+        }
+
+        //here id if a super potion is played
+        if(playCard.getCardName().equals("Super Potion")){
+            soup(player, isCpu, handPos);
+        }
+
+        //here is if penny is played
+        if(playCard.getCardName().equals("Penny")){
+            penny(player, isCpu, handPos);
+        }
+
+        
+    }
+    
+
+
+    //these are the methods that do what the trainer cards do
+
+    //professors reasearch
+    public void profReach(Player player){
+        if(supporterPerTurn == true){
+            System.out.println("You have already played a supporter this turn");
+        }
+        else{
+            for(int i = player.getHandSize(); i >= 0; i--){
+                player.discardCardHand(player.getHand(), 0);
+            }
+            for(int i = 0; i < 7; i++){
+                player.drawCard(player.getDeck());
+            }
+        }
+    }
+
+    //Potion
+    public void potion(Player player, boolean isCpu, int handPos){
+        //the cpu will automatically use it on their active slot
+        if(isCpu){
+            player.getActive().setHealth(player.getActive().getHealth() + 30);
+            if(player.getActive().getHealth() > player.getActive().getMaxHealth()){
+                player.getActive().setHealth(player.getActive().getMaxHealth());
+            }
+            player.cardPlayed(player.getHand(), handPos);
+        }
+        //if not player input is needed
+        else{
+            while(true){
+                int potionPos = getValidInput("Which pokemon do you want to heal (type 0 for active 1 for on on the bench)");
+                //so here we add 30 to the health of the active pokemon and then check if it is more than it's max health
+                //if it is then we set it's health to its original max health
+                if(potionPos == 0){
+                    player.getActive().setHealth(player.getActive().getHealth() + 30);
+                    if(player.getActive().getHealth() > player.getActive().getMaxHealth()){
+                        player.getActive().setHealth(player.getActive().getMaxHealth());
+                    }
+                    player.cardPlayed(player.getHand(), handPos);
+                    break;
+                }
+                if(potionPos == 1){
+                    //so first we have the user pick a pokemon on the bench
+                    int potPosTwo = pickBench(player);
+                    if(player.getBench()[potPosTwo] != null){
+                        player.getBench()[potPosTwo].setHealth(player.getBench()[potPosTwo].getHealth() + 30);
+                        if(player.getBench()[potPosTwo].getHealth() > player.getBench()[potPosTwo].getMaxHealth()){
+                            player.getBench()[potPosTwo].setHealth(player.getBench()[potPosTwo].getMaxHealth());
+                        }
+                        player.cardPlayed(player.getHand(), handPos);
+                        break;
+                    }
+                    else{
+                            System.out.println("That position does not have a pokemon");
+                        }
+                    }
+                else{
+                    System.out.println("That is not a valid number please try again");
+                }
+            }
+        }
+    }
+
+    //bill
+    public void bill(Player player, int handPos){
+        //we just draw two cards
+        if(supporterPerTurn){
+            System.out.println("You have already played a supporter per turn");
+        }
+        else{
+            player.cardPlayed(player.getHand(), handPos);
+            player.drawCard(player.getDeck());
+            player.drawCard(player.getDeck());
+            supporterPerTurn = true;
+        }
+    }
+    
+    //lillie
+    public void lillie(Player player, int handPos){
+        if(supporterPerTurn){
+            System.out.println("You have already played a supporter per turn");
+        }
+        else{
+            player.cardPlayed(player.getHand(), handPos);
+            //this is for the lillie card where you draw up to 6 cards unless it is turn 1 then you draw up to 8
+            if (turn == 1){
+                for(int i = player.getHand().length; i < 8; i++){
+                    player.drawCard(player.getDeck());
+                }
+                supporterPerTurn = true;
+                }
+            else{
+                for(int i = player.getHand().length; i < 6; i++){
+                    player.drawCard(player.getDeck());
+                }
+            }
+        }
+    }
+    //Super Potion
+    public void soup(Player player, boolean isCpu, int handPos){
+        if(isCpu){
+            player.getActive().setHealth(player.getActive().getHealth() + 60);
+            if(!player.getActive().getAttachedEnergies().isEmpty()){
+                player.getDiscardPile().add(player.getActive().getAttachedEnergies().get(0));
+                player.getActive().getAttachedEnergies().remove(0);
+            }
+            player.cardPlayed(player.getHand(), handPos);
+        }
+        else{
+            while(true){
+                int soupPotPos = getValidInput("Which pokemon do you want to heal (type 0 for active 1 for on on the bench)");
+                //so here we add 60 to the health of the active pokemon then check if it has any energies attached to it and if they do discard it
+                //so the energy is added to the discard pile and then removed from the array list of attached energies
+                //then we check if it has gone over it's max health
+                //if it is then we set it's health to its original max health
+                if(soupPotPos == 0){
+                    player.getActive().setHealth(player.getActive().getHealth() + 60);
+                    player.cardPlayed(player.getHand(), handPos);
+                    while (true){
+                    if(!player.getActive().getAttachedEnergies().isEmpty()){
+                        int energyDis = getValidInput("Which energy do you want to get rid of please type the number");
+                        if(energyDis <= player.getActive().getAttachedEnergies().size()){
+                            player.getDiscardPile().add(player.getActive().getAttachedEnergies().get(energyDis));
+                            player.getActive().getAttachedEnergies().remove(energyDis);   
+                            break;
+                        }
+                        else{
+                            System.out.println("not a valid index try again");
+                        }
+                    }
+                }
+                //if you are over the max health you go to the max health
+                if(player.getActive().getHealth() > player.getActive().getMaxHealth()){
+                    player.getActive().setHealth(player.getActive().getMaxHealth());
+                }
+                break;
+                }   
+                if(soupPotPos == 1){
+                    int soupPotPosTwo = pickBench(player);
+                    if(player.getBench()[soupPotPosTwo] != null ){
+                        player.getBench()[soupPotPosTwo].setHealth(player.getBench()[soupPotPosTwo].getHealth() + 60);
+                        player.cardPlayed(player.getHand(), handPos);
+                        if(player.getBench()[soupPotPosTwo].getHealth() > player.getBench()[soupPotPosTwo].getMaxHealth()){
+                            player.getBench()[soupPotPosTwo].setHealth(player.getBench()[soupPotPosTwo].getMaxHealth());
+                        }
+                    player.cardPlayed(player.getHand(), soupPotPosTwo);
+                    break;
+                    }
+                    else{
+                        System.out.println("That is not a valid input");
+                    }
+                }
+                else{
+                    System.out.println("That is not a valid number please try again");
+                }
+            }
+        }
+    }
+
+    //penny
+    public void penny(Player player, boolean isCpu, int handPos){
+    
+    //this is when the penny card is played where we make the player select their pokemon to retrive and then give back the eneriges
+    //attached to them as well as heal them to max health
+    //we also check to make sure that it wouldn't empty their deck
+        if(player.isBenchEmpty() || supporterPerTurn){
+            System.out.println("You you cannot play this card");
+        }
+        else{
+            if(isCpu){
+                player.cardPlayed(player.getHand(), handPos);
+                player.getActive().setHealth(player.getActive().getMaxHealth());
+                player.retrieve(player.getActive());
+                for(int i = 0; i < player.getActive().getAttachedEnergies().size(); i++){
+                    player.retrieve(player.getActive().getAttachedEnergies().get(i));
+                }
+                player.setActive(player.getBench()[0]);;
+            }
+            else{
+                int retreaveCard = getValidInput("Do you want to retreave your active or benched pokemon? 0 for active 1 for benched");
+                if(retreaveCard == 0){
+                //so here we make the pokemon get their max health since they are going back to their hand
+                player.cardPlayed(player.getHand(), handPos);
+                player.getActive().setHealth(player.getActive().getMaxHealth());
+                player.retrieve(player.getActive());
+                for(int i = 0; i < player.getActive().getAttachedEnergies().size(); i++){
+                    player.retrieve(player.getActive().getAttachedEnergies().get(i));
+                }
+                //calling a benched pokemon to the active slot
+                benchToActive(player);
+                }
+                if(retreaveCard == 1){
+                while(true){
+                    int benchPos = pickBench(player);
+                    if(player.getBench()[benchPos] != null){
+                        player.cardPlayed(player.getHand(), handPos);
+                        player.getBench()[benchPos].setHealth(player.getBench()[benchPos].getMaxHealth());
+                        //retrieving the selected pokemon from the bench to my hand
+                        player.retrieve(player.getBench()[benchPos]);
+                        //retreaving the attached energies to my hand
+                        for(int i = 0; i < player.getBench()[benchPos].getAttachedEnergies().size(); i++){
+                            player.retrieve(player.getBench()[benchPos].getAttachedEnergies().get(i));
+                        }
+                        
+                        break;
+                    }
+                    else{
+                        System.out.println("That is not a valid index");
+                    }
+                }
+                }
+            }
+        }
+    }
+    
+    //this is the retreat meathod
+    public void retreat(Player player){
+        
+    }
+    
     //this method here is what i will run any input throught to make sure that every input is at number so it doesn't crash
     //basically is loops until a number is put in
     public int getValidInput(String Message){
@@ -457,6 +637,7 @@ public class Game{
         gameOver = true;
     }  
 
+    //this is a method to take a pokemon from the bench and put them into the active slot
     public void benchToActive(Player player){
         while(true){
             int benchToActive = getValidInput("Please select a pokemon from the bench to set into the active slot (type the index of the card on the bench)");
@@ -483,6 +664,7 @@ public class Game{
             }
         }
     }
+
     //This is a method that populates a deck and returns it so that player 1 has this deck set 
     public Card[] player1Deck(){
         Card[] player1Deck = new Card[60];
