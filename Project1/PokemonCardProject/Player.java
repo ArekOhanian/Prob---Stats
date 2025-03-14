@@ -94,7 +94,6 @@ public class Player{
     //this is a general method to call whenever we need to discard a card fomr the hand
     public void discardCardHand(Card[] discardFromHand, int discardPos){
         discardPile.add(discardFromHand[discardPos]);
-        cardPlayed(discardFromHand, discardPos);
     }
 
     //this is a method to discard a card from the deck
@@ -232,7 +231,7 @@ public class Player{
 
     //this is a method to mulliagan your hand if you don't have a pokemon card in hand whe
     public void mulligan(Card[] hand, Card[] deck){
-        System.out.println(hand);
+        displayHand();
         for (int i = 0; i < hand.length; i++){
             Card temp = deck[i];
             deck[i] = hand[i];
@@ -286,7 +285,6 @@ public class Player{
     //method for making a card the active card from the hand
     public void makeActiveHand(Card[] Hand, int cardPos){
         activeCard = (PokemonCard) Hand[cardPos];
-        cardPlayed(Hand, cardPos);
     }
 
     //method for making a card the active card from the bench where we swap the benched and active pokemon
@@ -300,7 +298,6 @@ public class Player{
     public void benchPokemonHand(Card[] hand, int cardPos, int benchPos){
         if(bench[benchPos] == null){
             bench[benchPos] = (PokemonCard) hand[cardPos];
-            cardPlayed(hand, cardPos);
         }
         else{
             System.out.println("That position is not empty sending back to playing a card");
@@ -310,27 +307,21 @@ public class Player{
     //this is a method for formatting the hand array when a card is removed from it
     //basically I make a temp array of the old hand then I make hand a new array with one size less
     //then i copy it from the old hand but skip over the card you played
-    public void cardPlayed(Card[] hand, int cardPlayedpos){
-        Card[] oldHand = hand;
-        hand = new Card[oldHand.length - 1];
-        for(int i = 0; i < hand.length; i++){
-            if(i == cardPlayedpos){
+    public Card[] cardPlayed(Card[] hand, int cardPlayedpos){
+        Card[] newHand = new Card[hand.length - 1];
+        for(int i = 0, j = 0; i < hand.length; i++){
+            if (i == cardPlayedpos){
                 continue;
             }
-            if(i < cardPlayedpos){
-                hand[i] = oldHand[i];
-            }
-            if(i > cardPlayedpos){
-                hand[i] = oldHand[i + 1];
-            }
+            newHand[j++] = hand[i];
         }
+        return newHand;
     }
 
     //this is a method to atach energies to a pokemon in play
     //where we add to the array list and play the energy card from our hand
-    public void attachEnergy(Card[] hand, EnergyCard energyCard, PokemonCard pokemonToAttachTo, int energyCardPos){
+    public void attachEnergy(Card[] hand, EnergyCard energyCard, PokemonCard pokemonToAttachTo){
         pokemonToAttachTo.getAttachedEnergies().add(energyCard);
-        cardPlayed(hand, energyCardPos);
     }
 
     //I have this method to display the players hand to them in the terminal
@@ -338,18 +329,20 @@ public class Player{
     //ie [0 Pokemon: pikachu, 1 Energy: Electric, 2 Trainer: bill, 3 Energy: Electric]
     public void displayHand(){
         int count = 0;
+        System.out.print("[");
         for(Card card: hand){
-            System.out.print("[" + count + " " + card.getCardType() + ": " + card.getCardName() + ", ");
+            System.out.print(count + " " + card.getCardType() + ": " + card.getCardName() + ", ");
             count++;
         }
-        System.out.print("]");
+        System.out.println("]");
     }
 
     //this is a method to display the bench
     public void displayBench(){
         int count = 0;
-        for(Card card: bench){
-            System.out.print("[" + count + " " + card.getCardName() + ", ");
+        System.out.print("[");
+        for(int i = 0; i < bench.length; i++){
+            System.out.print(count + " " + bench[i] + ", ");
             count++;
         }
         System.out.print("]");
@@ -373,11 +366,11 @@ public class Player{
     }
 
     //this method is for the penny card and it is to retreave a card and put it into your hand
-    public void retrieve(Card card){
+    public Card[] retrieve(Card card){
         if (hand.length == 0){
             hand = new Card[1];
             hand[0] = card;
-            return;
+            return hand;
         }
         Card[] tempHand = hand;
         hand = new Card[tempHand.length + 1];
@@ -385,6 +378,7 @@ public class Player{
             hand[i] = tempHand[i];
         }
         hand[hand.length - 1] = card;
+        return hand;
     }
 
     //this is a method to feint a pokemon when they have 0 hp
@@ -412,6 +406,9 @@ public class Player{
         return hand;
     }
 
+    public void setHand(Card[] userHand){
+        hand = userHand;
+    }
     public PokemonCard[] getBench(){
         return bench;
     }
@@ -436,8 +433,9 @@ public class Player{
         return discardPile;
     }
 
-    public void setDiscardPile(ArrayList<Card> userDiscardPile){
-        discardPile = userDiscardPile;
+    public void setDiscardPile(){
+        discardPile = new ArrayList<Card>();
+        System.out.println("Discard Pile initialized");
     }
 
     public boolean getDeckIsEmpty(){
@@ -446,6 +444,11 @@ public class Player{
 
     public void setDeckIsEmpty(boolean userdeckIsEmpty){
         deckIsEmpty = userdeckIsEmpty;
+    }
+
+    public void setBench(){
+        bench = new PokemonCard[5];
+        System.out.println("Bench initialized");
     }
 }
 

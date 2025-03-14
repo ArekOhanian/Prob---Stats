@@ -5,6 +5,7 @@ public class EnergyCard extends Card{
 
     public EnergyCard(String element){
         setCardType("Energy");
+        setCardName(element);
         this.element = element;
     }
     //getters & setters
