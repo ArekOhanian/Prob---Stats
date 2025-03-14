@@ -261,24 +261,33 @@ public class Player{
 
         return count == importantCardCount;
     }
+
     //method for getting prize cards into your hand
     public Card[] drawPrizeCard(){
     
-        if(prizeCards.length == 1){
+        if(prizeCards.length == 0){
             return hand;
         }
-        Card prizeCard = prizeCards[prizeCards.length];
-        Card[] tempPrizeArray = prizeCards;
-        prizeCards = new Card[tempPrizeArray.length - 1];
-        for(int i = 0; i < prizeCards.length; i++){
-            prizeCards[i] = tempPrizeArray[i];
+
+        Card prizeCard = prizeCards[prizeCards.length - 1];
+
+        Card[] newPrizeCards = new Card[prizeCards.length -1];
+
+        for(int i = 0; i < newPrizeCards.length; i++){
+            newPrizeCards[i] = prizeCards[i];
         } 
-        Card[] oldHand = hand;
-        hand = new Card[oldHand.length + 1];
+
+        prizeCards = newPrizeCards;
+
+        Card[] newHand = new Card[hand.length + 1];
+
+
         for (int i =  0; i < hand.length; i++){
-            hand[i] = oldHand[i];
+            newHand[i] = hand[i];
         }
-        hand[hand.length - 1] = prizeCard;
+        newHand[newHand.length - 1] = prizeCard;
+
+        hand = newHand;
         return hand;
     }
     
@@ -348,6 +357,15 @@ public class Player{
         System.out.print("]");
     }
 
+    //this is a method for displaying a pokemon's moves
+    public void displayMoves(){
+        int count = 0;
+        System.out.print("[");
+        for (int i = 0; i < activeCard.getPokemonMoves().length; i++){
+            System.out.println(count + " " + activeCard.getPokemonMoves()[i].getName() + " needs " + activeCard.getPokemonMoves()[i].getPrimEnergyCostAmmount() + " " + activeCard.getPokemonMoves()[i].getPrimEnergyCostType() + " Energies, and " + activeCard.getPokemonMoves()[i].getTotalEnergyCost() + " total energies]" );
+        }
+    }
+
     //this is a method for displaying the active Pokemon
     public void displayActive(){
         System.out.println("Name: " + activeCard.getCardName() + ", Health: " + activeCard.getHealth() + ", Attacks: " + activeCard.getPokemonMoves() + ", Attached Energies: " + activeCard.getAttachedEnergies() + ", Retreat Cost: " + activeCard.getRetreatCost());
@@ -382,7 +400,8 @@ public class Player{
     }
 
     //this is a method to feint a pokemon when they have 0 hp
-    public void feintPokemon(){
+    public void feintPokemon(PokemonCard card){
+        System.out.println(card.getCardName() + " Has feinted");
         discardPile.add(activeCard);
         discardPile.addAll(activeCard.getAttachedEnergies());
         activeCard = null;

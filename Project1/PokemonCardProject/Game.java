@@ -29,21 +29,29 @@ public class Game{
     //put a pokemon down into the active slot and on the bench if needed, and put in the prize cards
     public void setup(){
         System.out.println("Starting Game: ");
+
         gameOver = false;
+
         player1 = new Player("Player 1");
         player2 = new Player("CPU");
+
         player1.setDeck(player1Deck());
         player2.setDeck(player2Deck());
+
         player1.setBench();
         player2.setBench();
+
         player1.setDiscardPile();
         player2.setDiscardPile();
+
         player1.setDeckIsEmpty(false);
         player2.setDeckIsEmpty(false);
         System.out.println("Decks are set: ");
+
         player1.setDeck(player1.shuffleDeck(player1.getDeck()));
         player2.setDeck(player2.shuffleDeck(player2.getDeck()));
         System.out.println("Decks are shuffled: ");
+
         System.out.println("Drawing starting hand: ");
         player1.populateHand(player1.getDeck(), 7);
         player2.populateHand(player2.getDeck(), 7);
@@ -79,7 +87,6 @@ public class Game{
             }
             else{
                 System.out.println("That is not a pokemon try again");
-                
             }
         }
         else{
@@ -93,12 +100,17 @@ public class Game{
                 break;
             }
             if (moreBench == 1){
-                int cardHandSelection = pickBench(player1);
-                if(player1.getHand()[cardHandSelection] == null){
-                    //player1.benchPokemonHand(player1.getHand());
+                player1.displayHand();
+                int cardHandSelection = getValidInput("Which card in hand do you want to put onto the bench? (type the card index in your hand)");
+                if(cardHandSelection < 0 && cardHandSelection >= player1.getHandSize()){
+                    System.out.println("That is not a valid index");
+                }
+                int cardBenchSelection = pickBench(player1);
+                if(player1.getBench()[cardBenchSelection] == null && player1.getHand()[cardHandSelection].getCardType().equals("Pokemon")){
+                    player1.benchPokemonHand(player1.getHand(), cardHandSelection, cardBenchSelection);
                 }
                 else{
-                    System.out.println("That bench position  is taken");
+                    System.out.println("That bench position is taken or that is not a pokemon card");
                 }
             }
             else{
@@ -148,6 +160,7 @@ public class Game{
         if(player.getDeckIsEmpty()){
             System.out.println(player.getName() +"'s deck is empty and is trying to draw a card");
             gameOver(opponent);
+            return;
         }
         player.drawCard(player.getDeck());
         player.displayHand();
@@ -169,7 +182,19 @@ public class Game{
         
         //this is the automated main phase where we look through the hand and play as many cards as possible from left to right
         if(isCpu){
-
+            if(player.getHandSize() == 0){
+                return;
+            }
+            Card playCard = player.getHand()[0];
+            if(playCard.getCardType().equals("Energy")){
+                attachEnergy(player, isCpu, 0);
+            }
+            if(playCard.getCardType().equals("Pokemon")){
+                pokemonPlayed(player, 0, isCpu);
+            }
+            if(playCard.getCardType().equals("Trainer")){
+                trainerPlayed(player, isCpu, playCard, 0);
+            }
         }
         else{
         //so here is a loop where it keeps asking the player if they want to play a card and if they want to they select a card in hand
@@ -178,6 +203,7 @@ public class Game{
         while(stillPlacing){
             int mainPhase = getValidInput("Player 1 do you want to play a card from your hand, skip your turn, or retreat your active slot? (type 0 to skip your main phase, type 1 to play a card, type 2 to retreat your active card)");
             if(mainPhase == 1){
+                player.displayHand();
                 stillPlacing = true;
                 if(player.getHandSize() == 0){
                     System.out.println("Your hand is empty and you cannot play a card");
@@ -199,7 +225,7 @@ public class Game{
 
                 //this is if they want to place down a pokemon card
                 if(playCard.getCardType().equals("Pokemon")){
-                    pokemonPlayed(player, handPos);
+                    pokemonPlayed(player, handPos, isCpu);
                 }
 
                 //this is if they want to place down a trainer card
@@ -249,7 +275,7 @@ public class Game{
             while(!hasAttacked){
                 int attackSelection = getValidInput("Player 1 do you want to attack? (type 1 for yes 0 for no)");
                 if(attackSelection == 1){
-                    System.out.println(player.getActive().getPokemonMoves());
+                    player.displayMoves();
                     int moveSelection = getValidInput("What Move do you want to use? (type the number coresponding to the move 0 for the first 1 for the second if there is one)");
                     if(moveSelection == 0 || moveSelection == 1){
                         int totalCount = 0;
@@ -310,14 +336,20 @@ public class Game{
         if(isCpu){
             player.attachEnergy(player.getHand(), (EnergyCard) player.getHand()[handPos], player.getActive());
             player.setHand(player.cardPlayed(player.getHand(), handPos));
+            System.out.println("Attached Energy to: " + player.getActive().getCardName());
 
         }
         else{
+            if(energyCardPerTurn){
+                System.out.println("You have already played an energy this turn");
+                return;
+            }
             int energyDec = getValidInput("Do you want to attach it to your active or your bench 0 for active 1 for bench");
             //attaches the energy card from your hand to the active pokemon
             if(energyDec == 0){
                 player.attachEnergy(player.getHand(), (EnergyCard) player.getHand()[handPos], player.getActive());
                 player.setHand(player.cardPlayed(player.getHand(), handPos));
+                System.out.println("Attached Energy to: " + player.getActive().getCardName());
                 energyCardPerTurn = true;
             }
             //now it checks if your bench is empty
@@ -332,6 +364,7 @@ public class Game{
                     if(player.getBench()[benchPos] != null){
                         player.attachEnergy(player.getHand(), (EnergyCard) player.getHand()[handPos], player.getBench()[benchPos]);
                         player.setHand(player.cardPlayed(player.getHand(), handPos));
+                        System.out.println("Attached energy to: " + player.getBench()[benchPos].getCardName());
                         energyCardPerTurn = true;
                         break;
                     }
@@ -345,11 +378,21 @@ public class Game{
     }
 
     //this method is for handliing when a pokemon is played
-    public void pokemonPlayed(Player player, int handPos){
+    public void pokemonPlayed(Player player, int handPos, boolean isCpu){
+        if(isCpu){
+            for(int i = 0; i < player.getBench().length; i++){
+                if(player.getBench()[i] == null){
+                    player.benchPokemonHand(player.getHand(), 0, i);
+                    player.setHand(player.cardPlayed(player.getHand(), 0));
+                }
+            }
+            return;
+        }
         int benchPos = pickBench(player);
         if(player.getBench()[benchPos] == null){
         player.benchPokemonHand(player.getHand(), handPos, benchPos);
         player.setHand(player.cardPlayed(player.getHand(), handPos));
+        System.out.println("Placed " + player.getBench()[benchPos].getCardName() + " on bench position " + benchPos);
         }
         else{
             System.out.println("That index is taken by another pokemon");
@@ -358,7 +401,7 @@ public class Game{
 
     //this is for when a trainer card is played this is mostly a buffer to see what trainer card it is
     public void trainerPlayed(Player player, boolean isCpu, Card playCard, int handPos){
-        //this is if you play professors reasearch
+        //this is if you play professors research
         if(playCard.getCardName().equals("Professors Research")){
             profReach(player);
             supporterPerTurn = true;
@@ -393,7 +436,7 @@ public class Game{
 
     //these are the methods that do what the trainer cards do
 
-    //professors reasearch
+    //professors research
     public void profReach(Player player){
         if(supporterPerTurn == true){
             System.out.println("You have already played a supporter this turn");
@@ -402,9 +445,12 @@ public class Game{
             for(int i = player.getHandSize(); i >= 0; i--){
                 player.discardCardHand(player.getHand(), 0);
             }
+            System.out.println("Discarded Hand");
             for(int i = 0; i < 7; i++){
                 player.drawCard(player.getDeck());
             }
+            System.out.println("Drew 7 cards");
+            player.displayHand();
         }
     }
 
@@ -417,6 +463,7 @@ public class Game{
                 player.getActive().setHealth(player.getActive().getMaxHealth());
             }
             player.setHand(player.cardPlayed(player.getHand(), handPos));
+            System.out.println("Healed " + player.getActive().getCardName() + " to " + player.getActive().getHealth());
         }
         //if not player input is needed
         else{
@@ -430,6 +477,7 @@ public class Game{
                         player.getActive().setHealth(player.getActive().getMaxHealth());
                     }
                     player.setHand(player.cardPlayed(player.getHand(), handPos));
+                    System.out.println("Healed " + player.getActive().getCardName() + " to " + player.getActive().getHealth());
                     break;
                 }
                 if(potionPos == 1){
@@ -441,6 +489,7 @@ public class Game{
                             player.getBench()[potPosTwo].setHealth(player.getBench()[potPosTwo].getMaxHealth());
                         }
                         player.setHand(player.cardPlayed(player.getHand(), handPos));
+                        System.out.println("Healed " + player.getBench()[potPosTwo].getCardName() + " to " + player.getBench()[potPosTwo].getHealth());
                         break;
                     }
                     else{
@@ -464,6 +513,8 @@ public class Game{
             player.setHand(player.cardPlayed(player.getHand(), handPos));
             player.drawCard(player.getDeck());
             player.drawCard(player.getDeck());
+            System.out.println("Drew 2 cards");
+            player.displayHand();
             supporterPerTurn = true;
         }
     }
@@ -480,12 +531,16 @@ public class Game{
                 for(int i = player.getHand().length; i < 8; i++){
                     player.drawCard(player.getDeck());
                 }
+                System.out.println("Drew to 8 cards");
+                player.displayHand();
                 supporterPerTurn = true;
                 }
             else{
                 for(int i = player.getHand().length; i < 6; i++){
                     player.drawCard(player.getDeck());
                 }
+                System.out.println("Drew to 6 cards");
+                player.displayHand();
             }
         }
     }
@@ -497,6 +552,7 @@ public class Game{
                 player.getDiscardPile().add(player.getActive().getAttachedEnergies().get(0));
                 player.getActive().getAttachedEnergies().remove(0);
             }
+            System.out.println("Healed " + player.getActive().getCardName() + " to " + player.getActive().getHealth());
             player.setHand(player.cardPlayed(player.getHand(), handPos));
         }
         else{
@@ -521,10 +577,11 @@ public class Game{
                             System.out.println("not a valid index try again");
                         }
                     }
-                }
-                //if you are over the max health you go to the max health
-                if(player.getActive().getHealth() > player.getActive().getMaxHealth()){
-                    player.getActive().setHealth(player.getActive().getMaxHealth());
+                    //if you are over the max health you go to the max health
+                    if(player.getActive().getHealth() > player.getActive().getMaxHealth()){
+                        player.getActive().setHealth(player.getActive().getMaxHealth());
+                    }
+                    System.out.println("Healed " + player.getActive().getCardName() + " to " + player.getActive().getHealth());
                 }
                 break;
                 }   
@@ -567,7 +624,8 @@ public class Game{
                 for(int i = 0; i < player.getActive().getAttachedEnergies().size(); i++){
                     player.retrieve(player.getActive().getAttachedEnergies().get(i));
                 }
-                player.setActive(player.getBench()[0]);;
+                player.setActive(player.getBench()[0]);
+                System.out.println("Retrieved " + player.getActive().getCardName());
             }
             else{
                 int retreaveCard = getValidInput("Do you want to retreave your active or benched pokemon? 0 for active 1 for benched");
@@ -579,6 +637,8 @@ public class Game{
                 for(int i = 0; i < player.getActive().getAttachedEnergies().size(); i++){
                     player.setHand(player.retrieve(player.getActive().getAttachedEnergies().get(i)));
                 }
+                System.out.println("Retrieved " + player.getActive().getCardName());
+                System.out.println("Need a new active pokemon");
                 //calling a benched pokemon to the active slot
                 benchToActive(player);
                 }
@@ -594,7 +654,7 @@ public class Game{
                         for(int i = 0; i < player.getBench()[benchPos].getAttachedEnergies().size(); i++){
                             player.setHand(player.retrieve(player.getBench()[benchPos].getAttachedEnergies().get(i)));
                         }
-                        
+                        System.out.println("Retrieved " + player.getBench()[benchPos].getCardName());
                         break;
                     }
                     else{
@@ -651,6 +711,7 @@ public class Game{
     
     //this is the attack method that is called durring the attack phase
     public void attack(Move attackingMove, PokemonCard toBeAttackedPokemon, Player attackingPlayer, Player damagedPlayer){
+        System.out.println(attackingPlayer.getActive().getCardName() + " Uses " + attackingMove.getName() + " against " + toBeAttackedPokemon.getCardName());
         //this is for the deino's move stomp off where it does no damage but discards the top card from the deck
         if (attackingMove.getName().equals("Stomp Off")){
             damagedPlayer.discardCardDeck();
@@ -659,32 +720,36 @@ public class Game{
         //this is to check if the pokemon is weak to the specific move element
         if(attackingMove.getPrimEnergyCostType().equals(toBeAttackedPokemon.getWeakness())){
             toBeAttackedPokemon.setHealth(toBeAttackedPokemon.getHealth() - (attackingMove.getDamage() * 2));
+            System.out.println("It did " + (attackingMove.getDamage() * 2) + " Damage");
             System.out.println("It was supper effective!");
         }
-        //of not we just subtract the health from the attacking move 
+        //if not we just subtract the health from the attacking move 
         else{
             toBeAttackedPokemon.setHealth(toBeAttackedPokemon.getHealth() - attackingMove.getDamage());
+            System.out.println("It did " +  attackingMove.getDamage() + " Damage");
         }
-        System.out.println("You have done " + attackingMove.getDamage() + " Damage. The opponents active has " + toBeAttackedPokemon.getHealth() + " Health left");
+
+        System.out.println("The opponent's active pokemon has " + toBeAttackedPokemon.getHealth() + " Health left");
         //here is where we check if the pokemon has feinted if they have then we draw a card from the bench
         if(toBeAttackedPokemon.getHealth() <= 0){
             //here we make sure that the bench is not empty cause if it is then the player who got attacked losses
-            damagedPlayer.feintPokemon();
+            damagedPlayer.feintPokemon(toBeAttackedPokemon);
             if(damagedPlayer.isBenchEmpty()){
                 System.out.println(damagedPlayer.getName() + " has no pokemon in play");
                 gameOver(attackingPlayer);
+                return;
             }
             System.out.println(attackingPlayer.getName() + " Draws a prize Card");
-            attackingPlayer.drawPrizeCard();
+            attackingPlayer.setHand(attackingPlayer.drawPrizeCard());
             // here we check if the attacking players prize pool is empty cause if it is then they win
             if(attackingPlayer.getPrizeCards().length == 0){
                 System.out.println(attackingPlayer.getName() + " Has collected all prize cards");
                 gameOver(attackingPlayer);
+                return;
             }
-            
         }
     }
-    
+
     //this method here is what i will run any input throught to make sure that every input is at number so it doesn't crash
     //basically is loops until a number is put in
     public int getValidInput(String Message){
@@ -769,9 +834,9 @@ public class Game{
             player1Deck[cardPlacement] = new PokemonCard(70, "Pawniard", pawnMoves, 2, attachedEnergies, "Grass");
             cardPlacement++;
         }
-        //here we are adding 4 professors reasearch cards
+        //here we are adding 4 professors research cards
         for (int i = 0; i < 4; i++){
-            player1Deck[cardPlacement] = new TrainerCard("Professors Reasearch", "Discard Your hand and draw 7 cards.");
+            player1Deck[cardPlacement] = new TrainerCard("Professors Research", "Discard Your hand and draw 7 cards.");
             cardPlacement++;
         }
         //here we are adding 4 potion cards
@@ -853,9 +918,9 @@ public class Game{
             player2Deck[cardPlacement] = new PokemonCard(50, "Flittle", sandMove, 1, attachedEnergies, "Dark");
             cardPlacement++;
         }
-        //4 professors reasearch cards
+        //4 professors research cards
         for (int i = 0; i < 4; i++){
-            player2Deck[cardPlacement] = new TrainerCard("Professors Reasearch", "Discard Your hand and draw 7 cards.");
+            player2Deck[cardPlacement] = new TrainerCard("Professors Research", "Discard Your hand and draw 7 cards.");
             cardPlacement++;
         }
 
