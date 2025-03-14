@@ -355,7 +355,7 @@ public class Player{
         System.out.print("]");
     }
 
-    //this is a method for displaying the active
+    //this is a method for displaying the active Pokemon
     public void displayActive(){
         System.out.println("Name: " + activeCard.getCardName() + ", Health: " + activeCard.getHealth() + ", Attacks: " + activeCard.getPokemonMoves() + ", Attached Energies: " + activeCard.getAttachedEnergies() + ", Retreat Cost: " + activeCard.getRetreatCost());
     }
@@ -386,16 +386,19 @@ public class Player{
         }
         hand[hand.length - 1] = card;
     }
+
     //this is a method to feint a pokemon when they have 0 hp
     public void feintPokemon(){
         discardPile.add(activeCard);
         discardPile.addAll(activeCard.getAttachedEnergies());
         activeCard = null;
     }
+
     //method to get the hand size
     public int getHandSize(){
         return hand.length;
     }
+
     //getters and setters
     public Card[] getDeck(){
         return deck;

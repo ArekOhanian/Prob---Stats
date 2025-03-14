@@ -186,7 +186,6 @@ public class Game{
 
     //this is the method for the mainphase like all we see if it is the player or the cpu
     public void mainPhase(Player player, boolean isCpu){
-        boolean energyCardPerTurn = false;
         boolean stillPlacing = true;
         
         //this is the automated main phase where we look through the hand and play as many cards as possible from left to right
@@ -198,7 +197,7 @@ public class Game{
         //then depending on the card it does a different thing
         //the loop will end when the player chooses it to or their hand is empty
         while(stillPlacing){
-            int mainPhase = getValidInput("Player 1 do you want to play a card from your hand or retreat your active slot? (type 0 to skip main phase type 1 to play a card type 2 to retreat your active card)");
+            int mainPhase = getValidInput("Player 1 do you want to play a card from your hand or retreat your active slot? (type 0 to skip your main phase type 1 to play a card type 2 to retreat your active card)");
             if(mainPhase == 1){
                 stillPlacing = true;
                 if(player.getHandSize() == 0){
@@ -248,7 +247,7 @@ public class Game{
     //this is the code for the attacking step
     public void attackPhase(Player player, Player opponent, boolean isCpu){
         //here the cpu attacks if it can if not it does nothing
-        if(isCpu){
+        if(isCpu && turn != 1){
             int totalCount = 0;
             int primCount = 0;
             for(EnergyCard energy: player.getActive().getAttachedEnergies()){
@@ -265,6 +264,10 @@ public class Game{
         //you can only exit if you say you do not want to attack or if you attack
         else{
             boolean hasAttacked = false;
+            if(turn == 1){
+                System.out.println("You cannot attack on the first turn movng to next step");
+                return;
+            }
             while(hasAttacked){
                 int attackSelection = getValidInput("Player 1 do you want to attack? (type 1 for yes 0 for no)");
                 if(attackSelection == 1){
@@ -290,6 +293,9 @@ public class Game{
                     else{
                         System.out.println("That is not a valid selection please select another or do not attack");
                     }
+                }
+                if(attackSelection == 0){
+                    return;
                 }
             }
         }
@@ -617,7 +623,45 @@ public class Game{
     
     //this is the retreat meathod
     public void retreat(Player player){
-        
+        //if the bench is empty you cannot retreat so this is the check to make sure you have pokemon on the bench
+        if(player.isBenchEmpty()){
+            System.out.println("Your bench is empty and you cannot retreat");
+            return;
+        }
+        //then we make sure you have enough energies to retreat
+        if(player.getActive().getAttachedEnergies().size() >= player.getActive().getRetreatCost()){
+            System.out.println("Reatreating: " + player.getName() + "'s active pokemon");
+            
+            //this loop is to make sure that the index chosen has a pokemon in it
+            while(true){
+
+                //we call pick bench to make the player choose which position on the bench to swap with
+                int retreatSwap = pickBench(player);
+
+                //this is a count to keep track of the ammount of energies you actually discarded
+                int discardedEnergies = 0;
+                if(player.getBench()[retreatSwap] != null){
+
+                    //this loop runs until you discard the active pokemons retreat cost
+                    while(discardedEnergies < player.getActive().getRetreatCost()){
+                        System.out.println(player.getActive().getAttachedEnergies());
+                        int disEnPos = getValidInput("Please select one to discard input the index of the energy card");
+                        if(disEnPos >= 0 && disEnPos < player.getActive().getAttachedEnergies().size()){
+                            player.getActive().getAttachedEnergies().remove(disEnPos);
+                            discardedEnergies++;
+                        }
+                        else{
+                            System.out.println("That is not a valid input try again");
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        else{
+            System.out.println("You do not have the required ammount of energies to retreat your active pokemon");
+            return;
+        }
     }
     
     //this method here is what i will run any input throught to make sure that every input is at number so it doesn't crash
@@ -740,8 +784,95 @@ public class Game{
         return player1Deck;
     }
 
-    //this is the method to make and return the cpu deck
+    //this is the method to make and return the cpu deck im makinng it weak to dark cause it's my game and I want to win (also to test out weaknesses)
+    //very similar to making player 1's deck
     private Card[] player2Deck(){
-        return null;
+        Card[] player2Deck = new Card[60];
+        ArrayList<EnergyCard> attachedEnergies = new ArrayList<>();
+        int cardPlacement = 0;
+
+        //pokemon moves
+        //sandygast moves
+        Move[] sandMove = new Move[1];
+        sandMove[0] = new Move("Sand Spray", 50, 3, "Normal", 3);
+
+        //yamask moves
+        Move[] maskMove = new Move[2];
+        maskMove[0] = new Move("Mumble", 10, 1, "Psychic", 1);
+        maskMove[1] = new Move("Petty Gudge", 20, 1, "Psychic", 2);
+
+        //flittle moves
+        Move[] fliMove = new Move[1];
+        fliMove[0] = new Move("peck", 10, 1, "Psychic", 1);
+
+        //ralts moves
+        Move[] raltMove = new Move[1];
+        raltMove[0] = new Move("Psyshot", 30, 1, "Psychic", 2);
+
+        //4 sandygasts
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new PokemonCard(90, "Sandygast", sandMove, 3, attachedEnergies, "Dark");
+            cardPlacement++;
+        }
+
+        //4 yamasks
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new PokemonCard(70, "Yamask", maskMove, 2, attachedEnergies, "Dark");
+            cardPlacement++;
+        }
+
+        //4 ralts
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new PokemonCard(70, "Ralts", raltMove, 1, attachedEnergies, "Dark");
+            cardPlacement++;
+        }
+
+        //4 flittles
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new PokemonCard(50, "Flittle", sandMove, 1, attachedEnergies, "Dark");
+            cardPlacement++;
+        }
+        //4 professors reasearch cards
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new TrainerCard("Professors Reasearch", "Discard Your hand and draw 7 cards.");
+            cardPlacement++;
+        }
+
+        //here we are adding 4 potion cards
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new TrainerCard("Potion", "Heal 30 damage from 1 of your pokemon");
+            cardPlacement++;
+        }
+
+        //here we are adding 4 bill cards
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new TrainerCard("Bill", "Draw 2 cards");
+            cardPlacement++;
+        }
+
+        //here we are adding 4 Lillie cards
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new TrainerCard("Lillie", "Draw cards untill you have 6 cards in hand unless it is the first turn then draw until you have 8");
+            cardPlacement++;
+        }
+
+        //here we are adding 4 super potion cards
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new TrainerCard("Super Potion", "Heal 60 damage from one of your pokemon. If you do discard an energy attached from that pokemon if there is one");
+            cardPlacement++;
+        }
+
+        //here we are adding 4 penny cards
+        for (int i = 0; i < 4; i++){
+            player2Deck[cardPlacement] = new TrainerCard("Penny", "Put one of your basic pokemon and all of it's energies into your hand");
+            cardPlacement++;
+        }
+
+        //fill the rest with energy cards
+        for (int i = cardPlacement; i < 60; i++){
+            player2Deck[cardPlacement] = new EnergyCard("Psychic");
+            cardPlacement++;
+        }
+        return player2Deck;
     }
 }
