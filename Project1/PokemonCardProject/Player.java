@@ -396,6 +396,16 @@ public class Player{
         return true;
     }
 
+    public boolean isBenchFull(){
+        int counter = 0;
+        for(int i = 0; i < bench.length; i++){
+            if(bench[i] != null){
+                counter++;
+            }
+        }
+        return((counter == bench.length - 1));
+    }
+
     //this method is for the penny card and it is to retreave a card and put it into your hand
     public Card[] retrieve(Card card){
         if (hand.length == 0){
