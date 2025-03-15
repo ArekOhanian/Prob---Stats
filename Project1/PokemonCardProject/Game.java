@@ -154,7 +154,6 @@ public class Game{
         drawPhase(player, opponent, isCpu);
         mainPhase(player, isCpu);
         attackPhase(player, opponent, isCpu);
-        endStep(player, isCpu);
     }       
 
     //this is the method for thr draw phase
@@ -309,29 +308,6 @@ public class Game{
         }
     }
 
-    //this is the method for when the turn ends
-    public void endStep(Player player, boolean isCpu){
-        if(isCpu){
-            while(player.getHandSize() > 7){
-                System.out.println("Hand is larger then 7 discarding a card");
-                player.discardCardHand(player.getHand(), 0);
-                player.setHand(player.cardPlayed(player.getHand(), 0));
-            }
-        }
-        else{
-            while(player.getHandSize() > 7){
-                player.displayHand();
-                int disPos = getValidInput("Your Hand is larger than 7 please select a card to discard");
-                if(disPos >= 0 && disPos < player.getHandSize() && player.getHand()[disPos] != null){
-                    player.discardCardHand(player.getHand(), disPos);
-                    player.setHand(player.cardPlayed(player.getHand(), disPos));
-                }
-                else{
-                    System.out.println("That is not a valid index try again");
-                }
-            }
-        }
-    }
 
     //this is the methods for the main phase
 
