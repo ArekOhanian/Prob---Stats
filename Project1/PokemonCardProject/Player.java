@@ -247,15 +247,11 @@ public class Player{
     //if not it returns false
     public boolean isBricked(Card[] userprizeCards, int importantCardCount){
         int count = 0;
-        //System.out.println("Checking prize cards");
-        for(Card card: userprizeCards){
-            //System.out.println("Card " + card.getCardType());
-           if(card.getCardType().equals("Trainer")){
 
-                //System.out.println("Trainer Card: " + trainerCard.getTrainerName());
-                if(card.getCardName().equals("Rare Candy")){
-                    count++;
-                }
+        for(Card card: userprizeCards){
+
+           if(card.getCardName().equals("Trainer")){
+                count++;
            }
         }
 
