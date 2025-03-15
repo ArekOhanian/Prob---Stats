@@ -194,7 +194,6 @@ public class Game{
                 return;
             }
             int i = 0;
-            int trainerAttempt = 0;
             while(i < player.getHandSize()){
                 System.out.println("played card index " + i);
 
@@ -211,23 +210,47 @@ public class Game{
                     System.out.println("Playing " + playCard.getCardName());
                     attachEnergy(player, isCpu, i);
                     cardPlayed = true;
+                    continue;
                 }
 
                 if(energyCardPerTurn){
                     cardPlayed = false;
                 }
 
-                //
+                //we play a pokemon card if the card in hand is a pokemon
                 if(playCard.getCardType().equals("Pokemon") && !player.isBenchFull()){
                     System.out.println("Playing " + playCard.getCardName());
                     pokemonPlayed(player, i, isCpu);
                     cardPlayed = true;
+                    continue;
                 }
-                if(playCard.getCardType().equals("Trainer") && trainerAttempt == 0){
+
+                //if the bench is full then a pokemon was neverplayed
+                if(player.isBenchFull()){
+                    cardPlayed = false;
+                }
+
+                if(playCard.getCardType().equals("Trainer") && !supporterPerTurn){
                     System.out.println("Playing " + playCard.getCardName());
+                    if(playCard.getCardName().equals("Penny")){
+                        if(player.isBenchEmpty()){
+                            System.out.println("You cannot play this card");
+                            cardPlayed = false;
+                            continue;
+                        }
+                        trainerPlayed(player, isCpu, playCard, i);
+                        cardPlayed = true;
+                        continue;
+                    }
+                    else{
                     trainerPlayed(player, isCpu, playCard, i);
                     cardPlayed = true;
-                    trainerAttempt++;
+                    continue;
+                    }
+                }
+                
+                if(playCard.getCardName().equals("Penny")  && supporterPerTurn || playCard.getCardName().equals("Bill")  && supporterPerTurn || playCard.getCardName().equals("Professors Research")  && supporterPerTurn || playCard.getCardName().equals("Lillie") && supporterPerTurn || playCard.getCardName().equals("Penny") && player.isBenchEmpty()){
+                    cardPlayed = false;
                 }
                 if(!cardPlayed){
                     i++;
@@ -398,17 +421,20 @@ public class Game{
     //this method is for handliing when a pokemon is played
     public void pokemonPlayed(Player player, int handPos, boolean isCpu){
         if(isCpu){
+            boolean pokemonPlaced = false;
             for(int i = 0; i < player.getBench().length; i++){
-                if(player.getBench()[i] == null && player.getHand()[i].getCardType().equals("Pokemon")){
+                if(player.getBench()[i] == null && player.getHand()[handPos].getCardType().equals("Pokemon")){
                     player.benchPokemonHand(player.getHand(), handPos, i);
                     player.setHand(player.cardPlayed(player.getHand(), handPos));
-                }
-                else{
-                    System.out.println("Bench is Full or it is not a pokemon card");
+                    pokemonPlaced = true;
                     return;
                 }
             }
-            return;
+            if(!pokemonPlaced){
+                System.out.println("CPU bench is full");
+                return;
+            }
+  
         }
         int benchPos = pickBench(player);
         if(player.getBench()[benchPos] == null){
