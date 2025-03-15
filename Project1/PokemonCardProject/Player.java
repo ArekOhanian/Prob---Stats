@@ -369,6 +369,7 @@ public class Player{
         System.out.print("[");
         for (int i = 0; i < activeCard.getPokemonMoves().length; i++){
             System.out.println(count + " " + activeCard.getPokemonMoves()[i].getName() + " needs " + activeCard.getPokemonMoves()[i].getPrimEnergyCostAmmount() + " " + activeCard.getPokemonMoves()[i].getPrimEnergyCostType() + " Energies, and " + activeCard.getPokemonMoves()[i].getTotalEnergyCost() + " total energies]" );
+            count++;
         }
     }
 

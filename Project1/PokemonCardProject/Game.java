@@ -195,7 +195,6 @@ public class Game{
             }
             int i = 0;
             while(i < player.getHandSize()){
-                System.out.println("played card index " + i);
 
                 //just in case it points to a null index we break
                 if(i >= player.getHandSize() - 1){
@@ -207,7 +206,7 @@ public class Game{
 
                 //when an energy card is found
                 if(playCard.getCardType().equals("Energy") && !energyCardPerTurn){
-                    System.out.println("Playing " + playCard.getCardName());
+                    System.out.println("CPU Playing " + playCard.getCardName());
                     attachEnergy(player, isCpu, i);
                     cardPlayed = true;
                     continue;
@@ -219,7 +218,7 @@ public class Game{
 
                 //we play a pokemon card if the card in hand is a pokemon
                 if(playCard.getCardType().equals("Pokemon") && !player.isBenchFull()){
-                    System.out.println("Playing " + playCard.getCardName());
+                    System.out.println("CPU Playing " + playCard.getCardName());
                     pokemonPlayed(player, i, isCpu);
                     cardPlayed = true;
                     continue;
@@ -231,7 +230,7 @@ public class Game{
                 }
 
                 if(playCard.getCardType().equals("Trainer") && !supporterPerTurn){
-                    System.out.println("Playing " + playCard.getCardName());
+                    System.out.println("CPU Playing " + playCard.getCardName());
                     if(playCard.getCardName().equals("Penny")){
                         if(player.isBenchEmpty()){
                             System.out.println("You cannot play this card");
@@ -252,6 +251,7 @@ public class Game{
                 if(playCard.getCardName().equals("Penny")  && supporterPerTurn || playCard.getCardName().equals("Bill")  && supporterPerTurn || playCard.getCardName().equals("Professors Research")  && supporterPerTurn || playCard.getCardName().equals("Lillie") && supporterPerTurn || playCard.getCardName().equals("Penny") && player.isBenchEmpty()){
                     cardPlayed = false;
                 }
+                
                 if(!cardPlayed){
                     i++;
                 }
