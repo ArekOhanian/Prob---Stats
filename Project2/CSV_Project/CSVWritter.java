@@ -10,7 +10,7 @@ public class CSVWritter {
 
     //for loop to find the ordered pairs
     public void orderedPairFiller(){
-        for(int i = 0; i <= 256; i++){
+        for(int i = 0; i < 100; i++){
             pairs.add(f.findResult(i));
         }
     }
