@@ -2,7 +2,7 @@ package Birthday_Program;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class FindBirthday extends Person{
+public class FindBirthday{
 
     private ArrayList<Person> classBirthdayList = new ArrayList<>();
     private double shareProbability;

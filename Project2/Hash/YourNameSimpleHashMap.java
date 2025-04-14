@@ -6,10 +6,7 @@ public class YourNameSimpleHashMap {
 
     //Count the number of letters in the string to make it the hash
     public int dumbHash(String a){
-        int pos = 0;
-        for(int i = 0; i < a.length(); i++){
-            pos += pos;
-        }
+        int pos = a.length();
         return pos;
     }
 
@@ -20,4 +17,15 @@ public class YourNameSimpleHashMap {
         }
         return false;
     }
+
+    public YourNameSimpleHashMap(LinkedList<String>[] data, int dumbHash){
+        this.data = data;
+        
+    }
+
+    //getters and setters
+    public LinkedList<String>[] getData(){
+        return data;
+    }
+    
 }
