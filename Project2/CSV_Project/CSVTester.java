@@ -6,7 +6,9 @@ public class CSVTester {
     public static void main(String[] args) throws FileNotFoundException{
         CSVWritter a = new CSVWritter();
         CSVSalter b = new CSVSalter();
+        CSVSmoother c = new CSVSmoother();
         a.CSVPlotter();
         b.CSVSaltWritter();
+        c.CSVSmootherOut();
     }
 }

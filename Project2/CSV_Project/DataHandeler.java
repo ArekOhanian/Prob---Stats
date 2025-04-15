@@ -16,8 +16,8 @@ public class DataHandeler {
         while(sc.hasNext()){
             String line = sc.nextLine();
             String y = line.substring(line.indexOf(", ") + 2, line.length());
-            int yN = Integer.parseInt(y);
-            OrderedPair pair = new OrderedPair(x, yN);
+            double yD = Double.parseDouble(y);
+            OrderedPair pair = new OrderedPair(x, yD);
             rippedPairs.add(pair);
         }
         sc.close();

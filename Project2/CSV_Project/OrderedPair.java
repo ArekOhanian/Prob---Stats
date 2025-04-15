@@ -3,10 +3,10 @@ package Project2.CSV_Project;
 public class OrderedPair{
     //global variables
     private int x;
-    private int y;
+    private double y;
 
     //constructor for the ordered pair
-    public OrderedPair(int x, int y){
+    public OrderedPair(int x, double y){
         this.x = x;
         this.y = y;
     }
@@ -20,7 +20,7 @@ public class OrderedPair{
         x = userX;
     }
 
-    public int getY(){
+    public double getY(){
         return y;
     }
 
