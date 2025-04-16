@@ -18,9 +18,8 @@ public class YourNameSimpleHashMap {
         return false;
     }
 
-    public YourNameSimpleHashMap(LinkedList<String>[] data, int dumbHash){
+    public YourNameSimpleHashMap(LinkedList<String>[] data){
         this.data = data;
-        
     }
 
     //getters and setters

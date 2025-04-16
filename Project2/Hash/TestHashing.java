@@ -4,21 +4,8 @@ import java.util.LinkedList;
 public class TestHashing {
     public static void main(String[] args){
         
+        YourNameSimpleHashMap hash = new YourNameSimpleHashMap(null, 0);
 
-        //creating strings to insert into the linkedLists
-        String a1 = "a";
-        String a2 = "aa";
-        String b1 = "bbb";
-        String b4 = "bbbb";
-
-        //initializing andf filling the linked lists to be inserted into the hashMap
-        LinkedList<String> a = new LinkedList<>();
-        LinkedList<String> b = new LinkedList<>();
-        a.add(a1);
-        a.add(a2);
-        
-        b.add(b1);
-        b.add(b4);
 
     }
 

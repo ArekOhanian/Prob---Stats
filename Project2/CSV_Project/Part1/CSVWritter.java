@@ -1,4 +1,4 @@
-package Project2.CSV_Project;
+package Project2.CSV_Project.Part1;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
 
