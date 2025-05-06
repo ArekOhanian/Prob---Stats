@@ -9,6 +9,6 @@ public class CSVTester {
         CSVSmoother c = new CSVSmoother();
         a.CSVPlotter();
         b.CSVSaltWritter();
-        c.CSVSmootherOut();
+        c.CSVSmootherOut(5);
     }
 }

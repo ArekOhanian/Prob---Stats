@@ -1,27 +1,22 @@
 package Project2.CSV_Project.Part1;
-import java.util.Random;
-import java.io.PrintWriter;
-import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 public class CSVSmoother {
 
-    private int windowValue;
     DataHandeler data = new DataHandeler();
     File file = new File("OrderedPairSalted.csv");
     
 
-    public void CSVSmootherOut() throws FileNotFoundException{
+    public void CSVSmootherOut(int windowValue) throws FileNotFoundException{
         ArrayList<OrderedPair> rippedPairs = data.CSVrip(file);
-        ArrayList<OrderedPair> smoothedParis = CSVSmoothing(rippedPairs);
+        ArrayList<OrderedPair> smoothedParis = CSVSmoothing(rippedPairs, windowValue);
         data.CSVWritter("OrderedPairSmooth.csv", smoothedParis);
     }
 
 
-    public ArrayList<OrderedPair> CSVSmoothing(ArrayList<OrderedPair> rippedPairs) throws FileNotFoundException{
-        windowValue = 5;
+    public ArrayList<OrderedPair> CSVSmoothing(ArrayList<OrderedPair> rippedPairs, int windowValue) throws FileNotFoundException{
         ArrayList<OrderedPair> smootedPairs = new ArrayList<>();
         for(int i = 0; i < rippedPairs.size(); i++){
             OrderedPair smoothed = new OrderedPair(i, getSmootedNumb(windowValue, rippedPairs, i));
@@ -30,6 +25,9 @@ public class CSVSmoother {
         return smootedPairs;
     }
 
+
+    //here is the math for the smoother Where I take the window value and go left and right of the current point and average their points.
+    //if its at the start then I change how many spots left and right I go to get the same amount of data to be averaged
     public double getSmootedNumb(int windowValue, ArrayList<OrderedPair> saltedList, int focusedPoint){
         double smoothedNumb = 0;
         if(focusedPoint < windowValue){

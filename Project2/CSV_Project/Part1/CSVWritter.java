@@ -17,7 +17,7 @@ public class CSVWritter {
     }
 
 
-    //Writing to the file
+    //Writing to the file by calling the data handeler class
     public void CSVPlotter() throws FileNotFoundException{
         orderedPairFiller();
         data.CSVWritter("OrderedPair.csv", pairs);
